@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비글 미로 찾기 시뮬레이터</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Malgun Gothic', system-ui, sans-serif;
+       background: #f6f7fb; color: #222; }
+h1 { font-size: 19px; margin: 0; }
+.sub { font-size: 12.5px; color: #6b7280; margin-top: 3px; }
+.card { background: #fff; border: 1px solid #e6e8ef; border-radius: 12px; padding: 12px 14px; }
+.row { display: flex; align-items: center; gap: 8px; margin: 9px 0; }
+.row label { flex: 0 0 104px; font-size: 12.5px; color: #444; }
+.row input[type=range] { flex: 1; min-width: 0; }
+.row .out { flex: 0 0 62px; text-align: right; font-size: 13px; color: #2e6fd9;
+            font-weight: 700; font-variant-numeric: tabular-nums; }
+button { font-family: inherit; font-size: 13.5px; padding: 8px 11px; border-radius: 8px;
+         border: 1px solid #d7dbe6; background: #fff; cursor: pointer; }
+button:hover { background: #f2f5fb; }
+button.go { background: #2e6fd9; border-color: #2e6fd9; color: #fff; }
+button.warn { background: #fdecea; border-color: #f3c9c4; color: #a8352c; }
+button.on { background: #e8f0fe; border-color: #9db8e8; color: #1d4ea8; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 6px; }
+.btnrow button { flex: 1 1 calc(50% - 3px); min-width: 0; }
+.cap { font-size: 11.5px; line-height: 1.5; color: #6b7280; margin: 6px 0 2px; }
+.nums { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; color: #444;
+        margin-top: 8px; }
+.nums b { color: #111; }
+.badge { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12.5px;
+         background: #eee; color: #555; margin-top: 8px; }
+.prog { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.prog .pfill { height: 100%; width: 0; background: #2e6fd9; }
+.rules { margin-top: 4px; }
+.rule { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 8px;
+        background: #f7f8fc; border: 1px solid #e6e8ef; margin-bottom: 5px; font-size: 12.5px; }
+.rule select { font-family: inherit; font-size: 12.5px; padding: 3px 4px; border-radius: 6px;
+               border: 1px solid #d7dbe6; background: #fff;
+               flex: 0 1 auto; min-width: 0; }  /* 글에 맞춰 두되, 좁으면 줄어든다 */
+.rule .ix { flex: 0 0 16px; color: #8a8fa3; text-align: right; }
+.rule .mini { flex: 0 0 auto; padding: 2px 5px; font-size: 11.5px; }
+.rule.hit { background: #e8f0fe; border-color: #9db8e8; }
+.toast { position: fixed; left: 50%; top: 14px; transform: translateX(-50%);
+         background: #111b2e; color: #fff; padding: 9px 14px; border-radius: 10px;
+         font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 9; }
+.toast.show { opacity: .94; }
+.hide { display: none; }
+canvas { border-radius: 10px; background: #fff; }
+.sideL { flex: 0 0 408px; display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+.sideR { flex: 0 0 232px; display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 7px; }
+.g3 { border: 1px solid #e6e8ef; background: #f7f8fc; border-radius: 8px;
+      padding: 6px 2px 5px; text-align: center; }
+.g3 .d { font-size: 10.5px; color: #8a8fa3; line-height: 1.3; }
+.g3 .v { font-size: 15.5px; font-weight: 700; color: #333;
+         font-variant-numeric: tabular-nums; line-height: 1.3; }
+.g3 .tv { font-size: 10px; color: #9aa0b4; min-height: 13px; line-height: 1.3; }
+.g3.open { background: #eaf3ff; border-color: #bdd4f5; }
+.g3.open .v { color: #1d4ea8; }
+.g3.wall { background: #fdecea; border-color: #f3c9c4; }
+.g3.wall .v { color: #a8352c; }
+.g3.mid { background: #fff; border-style: dashed; }
+.g3.mid .v { font-size: 14px; color: #394a63; }
+@media (max-width: 1180px) {
+  .sideL { flex: 0 0 386px; }
+  .sideR { flex: 0 0 206px; }
+  .row label { flex: 0 0 90px; font-size: 12px; }
+  .row .out { flex: 0 0 56px; }
+}
+</style></head><body>
+<div style="display:flex; gap:12px; padding:12px; height:100vh;">
+  <div class="sideL">
+    <div>
+      <h1>비글 미로 찾기 시뮬레이터</h1>
+      <div class="sub">라이다로 잰 거리로 벽인지 아닌지를 가른다</div>
+    </div>
+
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn_go" class="go">출발</button>
+        <button id="btn_step">한 칸만</button>
+        <button id="btn_reset">처음으로</button>
+        <button id="btn_clear">기록 지우기</button>
+      </div>
+      <div class="row"><label>벽 판정 기준</label>
+        <input id="in_thr" type="range" min="100" max="700" step="10">
+        <span class="out" id="out_thr"></span></div>
+      <div class="row"><label>속도</label>
+        <input id="in_speed" type="range" min="0.3" max="3" step="0.1">
+        <span class="out" id="out_speed"></span></div>
+      <div class="row"><label>회전 속도</label>
+        <input id="in_turn" type="range" min="0.3" max="3" step="0.1">
+        <span class="out" id="out_turn"></span></div>
+      <div class="cap">기준보다 가까우면 '벽', 멀면 '열림'으로 본다.
+        한 칸은 360mm — 바로 앞이 벽이면 160mm, 한 칸 열렸으면 520mm 로 찍힌다.<br>
+        <b>정지</b>를 누르면 칸을 건너는 도중에도 그 자리에서 멈춘다. 멈춘 자리의
+        라이다 값이 오른쪽 3x3 에 그대로 남는다.</div>
+      <div class="badge" id="badge">상태 : 멈춤</div>
+      <div class="prog"><div class="pfill" id="prog_fill"></div></div>
+      <div class="nums">
+        <span>진행 <b id="v_prog">0%</b></span>
+        <span>탈출 <b id="v_win">0</b></span>
+        <span>충돌 <b id="v_crash">0</b></span>
+        <span>맴돌기 <b id="v_stall">0</b></span>
+        <span>간 칸 <b id="v_step">0</b></span>
+        <span>회전 <b id="v_turn">0</b></span>
+        <span>방향 오차 <b id="v_drift">0°</b></span>
+        <span>쏠림 <b id="v_lat">0</b></span>
+      </div>
+      <div class="cap">탈출 = 도착 칸에 들어감 · 충돌 = 벽이 있는데 앞으로 감
+        · 맴돌기 = 60번 움직였는데도 도착에 더 가까워지지 못함</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <b style="font-size:13.5px;">로봇이 따르는 규칙</b>
+        <span class="cap" style="margin:0;">위에서부터 맞는 것 하나를 고른다</span>
+      </div>
+      <div class="rules" id="rules"></div>
+      <div class="btnrow" style="margin-top:6px;">
+        <button id="btn_add">+ 줄 넣기</button>
+        <button id="btn_left">좌수법</button>
+        <button id="btn_right">우수법</button>
+        <button id="btn_front">정면 우선</button>
+      </div>
+      <div class="cap" id="rule_hint">왼손을 벽에 대고 걷는 것과 같다 — 왼쪽이 열려 있으면 무조건 왼쪽.</div>
+      <div class="cap">'…으로 가기' 는 그쪽으로 돌고 한 칸 나아간다.
+        '…만 돌기' 는 제자리에서 방향만 바꾼다 — 그것만 쓰면 제자리를 맴돈다.</div>
+    </div>
+
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn_maze">다른 미로</button>
+        <button id="btn_new">새로 뽑기</button>
+        <button id="btn_draw">직접 그리기</button>
+        <button id="btn_teacher">교사용 열기</button>
+      </div>
+      <div class="cap" id="maze_name"></div>
+      <div id="teacher" class="hide">
+        <div class="row"><label>라이다 잡음</label>
+          <input id="in_noise" type="range" min="0" max="220" step="5">
+          <span class="out" id="out_noise"></span></div>
+        <div class="row"><label>최소 측정 거리</label>
+          <input id="in_minr" type="range" min="50" max="420" step="10">
+          <span class="out" id="out_minr"></span></div>
+        <div class="row"><label>벽 놓칠 확률</label>
+          <input id="in_miss" type="range" min="0" max="15" step="1">
+          <span class="out" id="out_miss"></span></div>
+        <div class="row"><label>회전 오차</label>
+          <input id="in_slip" type="range" min="0" max="15" step="1">
+          <span class="out" id="out_slip"></span></div>
+        <div class="btnrow">
+          <button id="btn_env1" class="warn">환경 ① 검은 무광 벽</button>
+          <button id="btn_env2" class="warn">환경 ② 유리·금속 벽</button>
+          <button id="btn_env3" class="warn">환경 ③ 미끄러운 바닥</button>
+          <button id="btn_env0">원래대로</button>
+        </div>
+        <div class="cap">라이다는 스스로 빛을 쏘아 되돌아오는 시간을 잰다.
+          그래서 <b>방이 밝은지 어두운지는 상관이 없다</b>. 흔들리는 것은 벽의 재질과 각도다.<br>
+          환경 ① <b>검은 무광 벽</b> — 빛을 거의 되돌려 주지 않아 가끔 벽을 놓친다
+          (잡음 ±60 · 놓침 2%, 다섯 판에 한 판쯤 박는다)<br>
+          환경 ② <b>유리·거울·금속 벽</b> — 빛이 비껴 나가 벽이 없는 것처럼 멀리 찍힌다
+          (잡음 ±180 · 놓침 3%, 절반 넘게 박는다)<br>
+          환경 ③ <b>미끄러운 바닥</b> — 라이다는 멀쩡하다. 바퀴가 미끄러져 몸이 틀어지고,
+          틀어진 채로 재니 값이 어긋나며 옆으로 쏠린다 (회전 오차 12°)<br>
+          잡음은 ±150 까지는 멀쩡하다. 벽 160 에 150 을 더해도 기준 300 을 못 넘기 때문이다.<br>
+          최소 측정 거리는 실물 라이다가 90mm 다. 360mm 로 올리면 벽이 모두 열려 보인다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1; min-width:0; display:flex; align-items:center; justify-content:center;">
+    <canvas id="cv"></canvas>
+  </div>
+
+  <div class="sideR">
+    <div class="card">
+      <b style="font-size:13.5px;">라이다가 지금 보는 값</b>
+      <div class="cap" style="margin-top:3px;">여덟 방향 거리 (mm)<br>위쪽이 로봇이 보는 앞</div>
+      <div class="grid3" id="grid3"></div>
+      <div class="btnrow" style="margin-top:7px;">
+        <button id="btn_true">참값 함께 보기</button>
+      </div>
+      <div class="cap">
+        <span style="color:#1d4ea8;">■</span> 기준보다 멀다 = 열림 ·
+        <span style="color:#a8352c;">■</span> 기준보다 가깝다 = 벽<br>
+        칸 가운데에서 재면 벽은 <b>160</b>, 한 칸 열렸으면 <b>520</b>,
+        두 칸이면 <b>880</b> 이다 (360 씩 늘어난다).
+        대각선은 모서리까지 <b>226</b> — 160의 √2 배다.
+        모서리가 양쪽 다 열려 있으면 그 틈으로 더 멀리 나간다.<br>
+        <b>∞</b> 는 되돌아온 빛이 없어 못 잰 것이다.<br>
+        달리는 중에 <b>정지</b>를 누르면 그 자리의 값이 멈춘다 —
+        "여기서는 얼마로 찍힐까" 를 먼저 맞혀 보게 한다.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ====== 치수 (mm) — 복층 미로 단원과 같다 ======
+const CELL = 360;          // 한 칸 (타일 180mm 두 장)
+const WALLT = 40;          // 벽 두께
+const BODY = 100;          // 비글 몸통 폭
+const MAXR = 5000;         // 라이다 최대 거리
+const STALL_ACTS = 60;     // 이만큼 움직였는데도 도착에 더 가까워지지 못하면 '맴돌기'
+
+// ====== 미로 ======
+//   cells[y][x] = {n,e,s,w} — true 면 그쪽에 벽이 있다
+function blank(w, h) {
+  const g = [];
+  for (let y = 0; y < h; y++) {
+    const row = [];
+    for (let x = 0; x < w; x++) row.push({ n: true, e: true, s: true, w: true });
+    g.push(row);
+  }
+  return { w, h, g, start: [0, h - 1], goal: [w - 1, 0], name: "" };
+}
+const DIRS = [[0, -1, "n", "s"], [1, 0, "e", "w"], [0, 1, "s", "n"], [-1, 0, "w", "e"]];
+
+function carve(m, x, y, nx, ny, di) {
+  m.g[y][x][DIRS[di][2]] = false;
+  m.g[ny][nx][DIRS[di][3]] = false;
+}
+
+// 되돌아가며 길을 파는 방식 — 막다른 길이 있는 보통 미로가 나온다
+function generate(w, h, loops) {
+  const m = blank(w, h);
+  const seen = [];
+  for (let y = 0; y < h; y++) seen.push(new Array(w).fill(false));
+  const stack = [[0, h - 1]];
+  seen[h - 1][0] = true;
+  while (stack.length) {
+    const [x, y] = stack[stack.length - 1];
+    const cand = [];
+    for (let i = 0; i < 4; i++) {
+      const nx = x + DIRS[i][0], ny = y + DIRS[i][1];
+      if (nx >= 0 && ny >= 0 && nx < w && ny < h && !seen[ny][nx]) cand.push(i);
+    }
+    if (!cand.length) { stack.pop(); continue; }
+    const di = cand[Math.floor(Math.random() * cand.length)];
+    const nx = x + DIRS[di][0], ny = y + DIRS[di][1];
+    carve(m, x, y, nx, ny, di);
+    seen[ny][nx] = true;
+    stack.push([nx, ny]);
+  }
+  // 벽 몇 개를 더 터서 갈림길을 만든다 (막다른 길만 있으면 규칙 차이가 안 보인다)
+  for (let k = 0; k < (loops || 0); k++) {
+    const x = Math.floor(Math.random() * w), y = Math.floor(Math.random() * h);
+    const di = Math.floor(Math.random() * 4);
+    const nx = x + DIRS[di][0], ny = y + DIRS[di][1];
+    if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+    carve(m, x, y, nx, ny, di);
+  }
+  m.name = "무작위";
+  return m;
+}
+
+// 수업에서 쓰는 고정 미로 — 숫자는 벽을 터는 자리다
+function preset(which) {
+  if (which === 0) {                       // 수업 기본 미로 : 5x5 외길 (좌수법·우수법 모두 통한다)
+    const m = blank(5, 5);                 // 출발(0,4) 왼쪽 아래 → 도착(4,0) 오른쪽 위, 최단 14걸음
+    const Hs = [[0, 4], [1, 4], [2, 4], [3, 4], [0, 3], [0, 2], [1, 2],
+                [1, 1], [0, 1], [0, 0], [1, 0], [2, 0], [3, 0], [3, 1], [3, 2]];
+    const Vs = [[1, 3], [0, 2], [2, 2], [2, 1], [0, 0], [3, 0], [4, 1], [4, 2], [3, 3]];
+    for (const [x, y] of Hs) carve(m, x, y, x + 1, y, 1);      // 오른쪽 칸과 잇는다
+    for (const [x, y] of Vs) carve(m, x, y, x, y + 1, 2);      // 아래 칸과 잇는다
+    m.name = "수업용 (기본)";
+    m.start = [0, 4]; m.goal = [4, 0];
+    return m;
+  }
+  if (which === 1) {                       // 복층 미로 단원의 한 층 (3x2 = 6칸)
+    const m = blank(3, 2);                 // 길 : 출발(0,1) → (0,0) → (1,0) → (1,1) → (2,1) → 도착(2,0)
+    const path = [[0, 1, 0], [0, 0, 1], [1, 0, 2], [1, 1, 1], [2, 1, 0]];
+    for (const [x, y, di] of path) carve(m, x, y, x + DIRS[di][0], y + DIRS[di][1], di);
+    m.name = "수업용 작은 미로 (복층 한 층)";
+    m.start = [0, 1]; m.goal = [2, 0];
+    return m;
+  }
+  if (which === 2) {                       // 한 줄로 이어진 ㄹ 자 — 좌수법이 잘 통한다
+    const m = blank(4, 4);
+    for (let y = 3; y >= 0; y--) {
+      const leftToRight = (3 - y) % 2 === 0;
+      for (let x = 0; x < 3; x++) carve(m, x, y, x + 1, y, 1);    // 가로로 잇고
+      if (y > 0) {                                                // 끝에서 한 줄 올린다
+        const ex = leftToRight ? 3 : 0;
+        carve(m, ex, y, ex, y - 1, 0);
+      }
+    }
+    m.name = "ㄹ 자";
+    m.start = [0, 3]; m.goal = [0, 0];
+    return m;
+  }
+  const m = generate(5, 5, 2);             // 그 밖에는 무작위
+  m.name = "무작위";
+  return m;
+}
+
+// ====== 상태 ======
+const S = {
+  thr: 300, speed: 1.2, turnSpeed: 1.2,
+  noise: 10, minr: 90, miss: 0, slip: 0,
+  maze: null, cx: 0, cy: 0, head: 0,          // head : 0 북 1 동 2 남 3 서
+  anim: null, running: false, stepping: false, drawing: false,
+  wins: 0, crashes: 0, stalls: 0, steps: 0, turns: 0,
+  best: 0, prog: 0, sinceBest: 0, hitRule: -1,
+  lid: new Array(8).fill(0),                  // 잰 값 (잡음 섞인 것)
+  lidT: new Array(8).fill(0),                 // 참값
+  drift: 0, lat: 0, showTrue: false,
+  msg: "멈춤", teacher: false, mazeIx: 0
+};
+
+// ====== 규칙 (블록) ======
+//  조건 이름은 짧게 — '조건 → 동작' 한 줄이 좁은 노트북에서도 잘리지 않아야 한다
+const COND = [
+  ["left_open", "왼쪽이 열림"], ["front_open", "앞이 열림"],
+  ["right_open", "오른쪽이 열림"], ["left_wall", "왼쪽이 벽"],
+  ["front_wall", "앞이 벽"], ["right_wall", "오른쪽이 벽"],
+  ["always", "언제나"]
+];
+//  '가기' 는 돌고 나서 한 칸 나아간다. '돌기' 는 제자리에서 방향만 바꾼다.
+//  돌기만 쓰면 제자리를 맴돈다 — 그것도 수업에서 보여 줄 거리다.
+const ACT = [
+  ["go_left", "왼쪽으로 가기"], ["go_front", "앞으로 가기"],
+  ["go_right", "오른쪽으로 가기"], ["go_back", "뒤로 돌아가기"],
+  ["turn_left", "왼쪽만 돌기"], ["turn_right", "오른쪽만 돌기"],
+  ["stop", "멈추기"]
+];
+const PRESETS = {
+  left: [["left_open", "go_left"], ["front_open", "go_front"],
+         ["right_open", "go_right"], ["always", "go_back"]],
+  right: [["right_open", "go_right"], ["front_open", "go_front"],
+          ["left_open", "go_left"], ["always", "go_back"]],
+  front: [["front_open", "go_front"], ["left_open", "go_left"],
+          ["right_open", "go_right"], ["always", "go_back"]]
+};
+let RULES = PRESETS.left.map(r => r.slice());
+
+// ====== 라이다 ======
+//   벽은 격자선 위에 40mm 두께로 서 있다. 어떤 점이 벽 속에 있는지 본다.
+//   벽은 이웃한 두 칸이 똑같이 들고 있으므로 점이 든 칸만 보면 된다.
+function wallAt(px, py) {
+  const m = S.maze, h = WALLT / 2;
+  const gx = Math.floor(px / CELL), gy = Math.floor(py / CELL);
+  if (gx < 0 || gy < 0 || gx >= m.w || gy >= m.h) return false;   // 미로 밖은 비어 있다
+  const c = m.g[gy][gx];
+  const ox = px - gx * CELL, oy = py - gy * CELL;
+  if (c.n && oy <= h) return true;
+  if (c.s && oy >= CELL - h) return true;
+  if (c.w && ox <= h) return true;
+  if (c.e && ox >= CELL - h) return true;
+  return false;
+}
+
+//   지금 자리에서 그 방향으로 쏜다. 조금씩 나아가며 처음 벽에 닿은 거리를 돌려준다.
+//   칸 단위가 아니라 mm 단위로 재기 때문에 칸을 건너는 도중에도 값이 나온다.
+const RAYSTEP = 6;
+function rayFrom(px, py, angDeg) {
+  const a = (angDeg - 90) * Math.PI / 180;        // 화면 좌표 (앞 = 위쪽)
+  const dx = Math.cos(a), dy = Math.sin(a);
+  const outW = S.maze.w * CELL, outH = S.maze.h * CELL;
+  for (let d = 0; d <= MAXR; d += RAYSTEP) {
+    const x = px + dx * d, y = py + dy * d;
+    if (x < -CELL || y < -CELL || x > outW + CELL || y > outH + CELL) break;
+    if (wallAt(x, y)) {
+      // 성큼성큼 오다 닿았으니 되짚어 다듬는다 — 벽은 160, 한 칸은 520 으로 딱 떨어져야 한다
+      let lo = Math.max(0, d - RAYSTEP), hi = d;
+      for (let i = 0; i < 12; i++) {
+        const mid = (lo + hi) / 2;
+        if (wallAt(px + dx * mid, py + dy * mid)) hi = mid; else lo = mid;
+      }
+      return hi;
+    }
+  }
+  return MAXR;                                     // 되돌아온 빛이 없다
+}
+
+//   잡음과 '놓침' 은 매 그림마다 새로 뽑으면 숫자가 읽을 수 없게 떨린다.
+//   0.12초마다 한 번씩만 새로 뽑고, 그 사이에는 같은 값을 쓴다.
+function resampleErr() {
+  S.nz = []; S.mz = [];
+  for (let k = 0; k < 8; k++) {
+    S.nz.push(Math.random() + Math.random() - 1);     // 가운데가 두꺼운 잡음
+    S.mz.push(Math.random() * 100 < S.miss);
+  }
+  S.nzAge = 0;
+}
+function sampleAll(fresh) {
+  if (fresh || !S.nz) resampleErr();
+  const [px, py, ang] = robotPose();
+  for (let k = 0; k < 8; k++) {                       // k : 앞에서 시계 방향 45도씩
+    const t = rayFrom(px, py, ang + k * 45);
+    let d = S.mz[k] ? MAXR : t + S.nz[k] * S.noise;
+    if (d < S.minr) d = S.minr;                       // 이보다 가까운 것은 못 잰다
+    S.lidT[k] = t;
+    S.lid[k] = Math.max(0, Math.min(MAXR, d));
+  }
+}
+function openQ(v) { return v > S.thr; }
+
+// ====== 규칙 고르기 ======
+function decide() {
+  sampleAll(true);                                    // 판단하는 순간 새로 잰다
+  const open = { front: openQ(S.lid[0]), right: openQ(S.lid[2]), left: openQ(S.lid[6]) };
+  for (let i = 0; i < RULES.length; i++) {
+    const [c, a] = RULES[i];
+    let ok = false;
+    if (c === "always") ok = true;
+    else if (c === "left_open") ok = open.left;
+    else if (c === "front_open") ok = open.front;
+    else if (c === "right_open") ok = open.right;
+    else if (c === "left_wall") ok = !open.left;
+    else if (c === "front_wall") ok = !open.front;
+    else if (c === "right_wall") ok = !open.right;
+    if (ok) { S.hitRule = i; return a; }
+  }
+  S.hitRule = -1;
+  return "stop";
+}
+
+// ====== 도착까지 남은 칸 수 (진행률과 맴돌기 판정에 쓴다) ======
+function bfs(fx, fy) {
+  const far = [];
+  for (let y = 0; y < S.maze.h; y++) far.push(new Array(S.maze.w).fill(-1));
+  const [gx, gy] = S.maze.goal;
+  far[gy][gx] = 0;
+  const q = [[gx, gy]];
+  while (q.length) {
+    const [x, y] = q.shift();
+    for (let i = 0; i < 4; i++) {
+      if (S.maze.g[y][x][DIRS[i][2]]) continue;
+      const nx = x + DIRS[i][0], ny = y + DIRS[i][1];
+      if (nx < 0 || ny < 0 || nx >= S.maze.w || ny >= S.maze.h) continue;
+      if (far[ny][nx] >= 0) continue;
+      far[ny][nx] = far[y][x] + 1;
+      q.push([nx, ny]);
+    }
+  }
+  return far[fy][fx];
+}
+
+// ====== 한 걸음 ======
+function startStep() {
+  if (S.anim) return;
+  if (S.queue && S.queue.length) { runAction(S.queue.shift()); return; }
+  const act = decide();
+  if (act === "stop") {
+    S.running = false; S.stepping = false; S.msg = "멈춤 — 맞는 규칙이 없다"; return;
+  }
+  // '가기' 는 돌고 나서 나아간다 — 두 동작을 줄줄이 세워 둔다
+  const CHAIN = {
+    go_left: ["turn_left", "forward"], go_right: ["turn_right", "forward"],
+    go_back: ["turn_back", "forward"], go_front: ["forward"]
+  };
+  const chain = CHAIN[act];
+  if (chain) { S.queue = chain.slice(); runAction(S.queue.shift()); return; }
+  runAction(act);
+}
+
+function runAction(act) {
+  if (act === "forward") {
+    const blocked = S.maze.g[S.cy][S.cx][DIRS[S.head][2]];
+    const nx = S.cx + DIRS[S.head][0], ny = S.cy + DIRS[S.head][1];
+    const outside = nx < 0 || ny < 0 || nx >= S.maze.w || ny >= S.maze.h;
+    if (blocked || outside) {                 // 벽이 있는데 갔다 — 충돌
+      S.crashes++; S.running = false; S.stepping = false; S.queue = [];
+      S.anim = { kind: "bump", t: 0, dur: 0.35 };
+      toast("충돌 — 벽이 있는데 앞으로 갔습니다");
+      return;
+    }
+    // 비스듬히 달리면 한 칸 갈 때마다 옆으로 쏠린다. 쏠림이 쌓이면 벽을 긁는다.
+    //   통로 280mm 에 몸통 100mm — 한쪽으로 90mm 까지만 여유가 있다.
+    //   칸을 지날 때 벽을 보고 어느 정도 가운데로 돌아오므로, 쏠림의 절반은 지워진다.
+    const room = (CELL - 2 * WALLT - BODY) / 2;
+    const lat0 = S.lat || 0;
+    S.lat = lat0 * 0.5 + CELL * Math.sin((S.drift || 0) * Math.PI / 180) * 0.4;
+    if (Math.abs(S.lat) > room) {
+      S.crashes++; S.running = false; S.stepping = false; S.queue = [];
+      S.anim = { kind: "bump", t: 0, dur: 0.35 };
+      toast("충돌 — 옆으로 " + Math.round(Math.abs(S.lat)) + "mm 쏠려 벽을 긁었습니다");
+      return;
+    }
+    S.anim = { kind: "move", t: 0, dur: 0.75 / S.speed, fx: S.cx, fy: S.cy, tx: nx, ty: ny,
+               lat0: lat0, lat1: S.lat };
+    return;
+  }
+  if (act === "stop") { S.running = false; S.stepping = false; S.msg = "멈춤"; return; }
+  const turn = act === "turn_left" ? -1 : act === "turn_right" ? 1 : 2;
+  const err = (Math.random() * 2 - 1) * S.slip;            // 이번 회전의 오차(도)
+  S.anim = { kind: "turn", t: 0, dur: (Math.abs(turn) * 0.45) / S.turnSpeed,
+             from: S.head, base: S.drift || 0, delta: turn, err: err };
+}
+
+function finishStep() {
+  const a = S.anim;
+  S.anim = null;
+  if (!a || a.kind === "bump") return;
+  if (a.kind === "move") { S.cx = a.tx; S.cy = a.ty; }
+  else {
+    S.head = ((S.head + a.delta) % 4 + 4) % 4;
+    // 바퀴가 미끄러지면 돌 때마다 조금씩 어긋난다. 쌓여서 45도를 넘으면
+    // 로봇은 한 칸 더(또는 덜) 돈 셈이 되어 엉뚱한 쪽을 보고 달린다.
+    S.drift = (S.drift || 0) + (a.err || 0);
+    while (Math.abs(S.drift) >= 45) {
+      const sign = S.drift > 0 ? 1 : -1;
+      S.head = ((S.head + sign) % 4 + 4) % 4;
+      S.drift -= 90 * sign;
+      S.slips = (S.slips || 0) + 1;
+    }
+  }
+  if (a.kind === "move") S.steps++; else S.turns++;
+
+  const [gx, gy] = S.maze.goal;
+  if (S.cx === gx && S.cy === gy) {
+    S.wins++; S.running = false; S.stepping = false; S.prog = 1;
+    toast("탈출! (" + S.wins + "번째) — " + S.steps + "칸 · 회전 " + S.turns + "번");
+    setTimeout(resetRobot, 900);
+    return;
+  }
+  const d = bfs(S.cx, S.cy);
+  const d0 = S.startDist || 1;
+  const p = Math.max(0, Math.min(1, 1 - d / d0));
+  // 맴돌기는 시간이 아니라 '움직인 횟수'로 센다. 속도를 올렸다고 판정이 달라지면 안 된다.
+  if (p > S.best) { S.best = p; S.sinceBest = 0; } else S.sinceBest++;
+  S.prog = S.best;
+  if (S.sinceBest >= STALL_ACTS) {
+    S.stalls++; S.sinceBest = 0; S.running = false; S.stepping = false; S.queue = [];
+    toast("맴돌기 — " + STALL_ACTS + "번 움직였는데 도착에 더 가까워지지 못했습니다");
+  }
+}
+
+// ====== 되돌리기 ======
+function resetRobot() {
+  S.cx = S.maze.start[0]; S.cy = S.maze.start[1];
+  S.head = 0; S.anim = null;
+  S.startDist = Math.max(1, bfs(S.cx, S.cy));
+  S.best = 0; S.prog = 0; S.sinceBest = 0; S.steps = 0; S.turns = 0; S.queue = [];
+  S.drift = 0; S.lat = 0; S.stepping = false;
+  S.msg = "멈춤";
+  sampleAll(true);
+}
+function setMaze(m) {
+  S.maze = m;
+  document.getElementById("maze_name").textContent =
+    "지금 미로 : " + m.name + "  (" + m.w + "x" + m.h + " 칸)";
+  resetRobot();
+  fit();
+}
+
+// ====== 그리기 ======
+let canvas, ctx, PX = 1, OX = 0, OY = 0;
+function fit() {
+  const box = canvas.parentElement.getBoundingClientRect();
+  const availW = Math.max(240, box.width - 16), availH = Math.max(240, box.height - 16);
+  const mmW = S.maze.w * CELL, mmH = S.maze.h * CELL;
+  PX = Math.min(availW * 0.94 / mmW, availH * 0.94 / mmH, 0.9);   // 칸이 너무 커지지 않게
+  canvas.width = Math.round(mmW * PX + 40);
+  canvas.height = Math.round(mmH * PX + 40);
+  OX = 20; OY = 20;
+}
+const sx = mm => OX + mm * PX;
+const sy = mm => OY + mm * PX;
+
+//   지금 로봇이 있는 자리와 보는 쪽 (mm, 도). 칸을 건너는 중이면 그 중간 자리다.
+function robotPose() {
+  let cx = S.cx * CELL + CELL / 2, cy = S.cy * CELL + CELL / 2;
+  let ang = S.head * 90 + (S.drift || 0);
+  let lat = S.lat || 0;
+  const a = S.anim;
+  if (a && a.kind === "move") {
+    const k = a.t / a.dur;
+    cx = (a.fx + (a.tx - a.fx) * k) * CELL + CELL / 2;
+    cy = (a.fy + (a.ty - a.fy) * k) * CELL + CELL / 2;
+    lat = a.lat0 + (a.lat1 - a.lat0) * k;
+  } else if (a && a.kind === "turn") {
+    const k = a.t / a.dur;
+    ang = a.from * 90 + a.base + (a.delta * 90 + a.err) * k;
+  } else if (a && a.kind === "bump") {
+    const k = Math.sin(a.t / a.dur * Math.PI) * 18;
+    cx += Math.cos((ang - 90) * Math.PI / 180) * k;
+    cy += Math.sin((ang - 90) * Math.PI / 180) * k;
+  }
+  // 몸이 틀어진 채 달리면 통로 가운데에서 옆으로 벗어난다 (오른쪽이 +)
+  const p = ang * Math.PI / 180;
+  return [cx + Math.cos(p) * lat, cy + Math.sin(p) * lat, ang];
+}
+
+function draw() {
+  const m = S.maze;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 바닥 격자
+  ctx.strokeStyle = "#eef0f6"; ctx.lineWidth = 1;
+  for (let y = 0; y <= m.h; y++) {
+    ctx.beginPath(); ctx.moveTo(sx(0), sy(y * CELL));
+    ctx.lineTo(sx(m.w * CELL), sy(y * CELL)); ctx.stroke();
+  }
+  for (let x = 0; x <= m.w; x++) {
+    ctx.beginPath(); ctx.moveTo(sx(x * CELL), sy(0));
+    ctx.lineTo(sx(x * CELL), sy(m.h * CELL)); ctx.stroke();
+  }
+
+  // 출발 · 도착
+  const mark = (c, color, text) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(sx(c[0] * CELL + 30), sy(c[1] * CELL + 30),
+                 (CELL - 60) * PX, (CELL - 60) * PX);
+    ctx.fillStyle = "#fff"; ctx.font = "600 " + Math.max(11, 56 * PX) + "px 'Malgun Gothic'";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(text, sx(c[0] * CELL + CELL / 2), sy(c[1] * CELL + CELL / 2));
+  };
+  mark(m.start, "#cfe6d8", "출발");
+  mark(m.goal, "#f6d7d3", "도착");
+
+  // 벽
+  ctx.strokeStyle = "#1e2433";
+  ctx.lineWidth = Math.max(2, WALLT * PX);
+  ctx.lineCap = "butt";
+  for (let y = 0; y < m.h; y++) {
+    for (let x = 0; x < m.w; x++) {
+      const c = m.g[y][x], X = x * CELL, Y = y * CELL;
+      const seg = (x1, y1, x2, y2) => {
+        ctx.beginPath(); ctx.moveTo(sx(x1), sy(y1)); ctx.lineTo(sx(x2), sy(y2)); ctx.stroke();
+      };
+      if (c.n) seg(X, Y, X + CELL, Y);
+      if (c.w) seg(X, Y, X, Y + CELL);
+      if (x === m.w - 1 && c.e) seg(X + CELL, Y, X + CELL, Y + CELL);
+      if (y === m.h - 1 && c.s) seg(X, Y + CELL, X + CELL, Y + CELL);
+    }
+  }
+
+  // 라이다 여덟 가닥 (앞 · 옆은 굵게, 대각선은 가늘게)
+  const [rx, ry, ang] = robotPose();
+  const rad = d => (d - 90) * Math.PI / 180;
+  const cap = (m.w + m.h) * CELL;
+  for (let k = 0; k < 8; k++) {
+    const main = k % 2 === 0;
+    const d = Math.min(S.lid[k], cap);
+    ctx.strokeStyle = k === 0 ? "#2e6fd9" : (main ? "#7aa7e8" : "#b9cdf0");
+    ctx.globalAlpha = main ? 0.5 : 0.34;
+    ctx.lineWidth = Math.max(1, (main ? 9 : 5) * PX);
+    ctx.beginPath(); ctx.moveTo(sx(rx), sy(ry));
+    ctx.lineTo(sx(rx + Math.cos(rad(ang + k * 45)) * d),
+               sy(ry + Math.sin(rad(ang + k * 45)) * d));
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // 로봇
+  const R = BODY / 2;
+  ctx.save();
+  ctx.translate(sx(rx), sy(ry));
+  ctx.rotate(rad(ang));
+  ctx.fillStyle = "#394a63";
+  ctx.fillRect(-R * PX, -R * PX, 2 * R * PX, 2 * R * PX);
+  ctx.fillStyle = "#ffd34d";
+  ctx.beginPath();
+  ctx.moveTo(R * PX, 0); ctx.lineTo(0, -R * 0.6 * PX); ctx.lineTo(0, R * 0.6 * PX);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// ====== 한 틱 ======
+let last = 0;
+function tick(now) {
+  const dt = Math.min(0.05, (now - last) / 1000 || 0);
+  last = now;
+  const live = S.running || S.stepping;
+  if (S.anim) {
+    if (live) {                             // 멈춰 있으면 그 자리에 그대로 선다
+      S.anim.t += dt;
+      if (S.anim.t >= S.anim.dur) finishStep();
+    }
+  } else if (S.running) {
+    startStep();
+  } else if (S.stepping) {                  // '한 칸만' — 돌고 나아가는 묶음을 끝까지
+    if (S.queue && S.queue.length) startStep();
+    else { S.stepping = false; S.msg = "멈춤"; }
+  }
+  // 멈춰 있어도 라이다는 돌고 있다 — 지금 자리의 값을 계속 보여 준다
+  S.nzAge = (S.nzAge || 0) + dt;
+  sampleAll(S.nzAge > 0.12);
+  draw(); paint();
+  requestAnimationFrame(tick);
+}
+
+// ====== 화면 숫자 ======
+//   3x3 자리 → 라이다 번호 (-1 은 가운데). 번호는 앞에서 시계 방향으로 45도씩이다.
+const G3 = [[7, 0, 1], [6, -1, 2], [5, 4, 3]];
+const G3LAB = ["앞", "앞오른", "오른", "뒤오른", "뒤", "뒤왼", "왼", "앞왼"];
+const HEADLAB = ["북", "동", "남", "서"];
+
+function buildGrid() {
+  const box = document.getElementById("grid3");
+  box.innerHTML = "";
+  for (const row of G3) {
+    for (const k of row) {
+      const d = document.createElement("div");
+      if (k < 0) {
+        d.className = "g3 mid";
+        d.innerHTML = '<div class="d">지금 자리</div>'
+          + '<div class="v" id="g3pos">-</div>'
+          + '<div class="tv" id="g3head">-</div>';
+      } else {
+        d.className = "g3";
+        d.innerHTML = '<div class="d">' + G3LAB[k] + '</div>'
+          + '<div class="v" id="g3v' + k + '">0</div>'
+          + '<div class="tv" id="g3t' + k + '"></div>';
+      }
+      box.appendChild(d);
+    }
+  }
+}
+
+function paint() {
+  const g = id => document.getElementById(id);
+  for (let k = 0; k < 8; k++) {
+    const el = g("g3v" + k);
+    if (!el) continue;
+    const d = S.lid[k], lost = d >= MAXR - 0.5;
+    el.textContent = lost ? "∞" : Math.round(d);
+    const cell = el.parentElement;
+    const isOpen = openQ(d);
+    cell.classList.toggle("open", isOpen);
+    cell.classList.toggle("wall", !isOpen);
+    g("g3t" + k).textContent = S.showTrue ? "참 " + Math.round(S.lidT[k]) : "";
+  }
+  if (g("g3pos")) {
+    g("g3pos").textContent = "(" + S.cx + ", " + S.cy + ")";
+    g("g3head").textContent = HEADLAB[S.head] + "쪽을 봄";
+  }
+  g("v_prog").textContent = Math.round(S.prog * 100) + "%";
+  g("prog_fill").style.width = (S.prog * 100).toFixed(0) + "%";
+  g("v_win").textContent = S.wins;
+  g("v_crash").textContent = S.crashes;
+  g("v_stall").textContent = S.stalls;
+  g("v_step").textContent = S.steps;
+  g("v_turn").textContent = S.turns;
+  g("v_drift").textContent = Math.round(S.drift || 0) + "°";
+  g("v_lat").textContent = Math.round(S.lat || 0) + "mm";
+  const b = g("badge");
+  const half = !S.running && !S.stepping && S.anim && S.anim.kind === "move";
+  b.textContent = "상태 : " + (S.running ? "달리는 중" : (half ? "멈춤 (칸을 건너는 중)" : S.msg));
+  b.style.background = S.running ? "#eaf3ff" : "#eee";
+  b.style.color = S.running ? "#1d4ea8" : "#555";
+  for (let i = 0; i < RULES.length; i++) {
+    const el = document.getElementById("rule" + i);
+    if (el) el.classList.toggle("hit", i === S.hitRule && (S.running || S.stepping));
+  }
+}
+
+function toast(text) {
+  const t = document.getElementById("toast");
+  t.textContent = text; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+// ====== 규칙 화면 ======
+function drawRules() {
+  const box = document.getElementById("rules");
+  box.innerHTML = "";
+  RULES.forEach(([c, a], i) => {
+    const row = document.createElement("div");
+    row.className = "rule"; row.id = "rule" + i;
+    const ix = document.createElement("span");
+    ix.className = "ix"; ix.textContent = (i + 1) + ".";
+    const cs = document.createElement("select");
+    COND.forEach(([v, label]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = label; if (v === c) o.selected = true;
+      cs.appendChild(o);
+    });
+    cs.onchange = e => { RULES[i][0] = e.target.value; };
+    const arrow = document.createElement("span"); arrow.textContent = "→";
+    const as = document.createElement("select");
+    ACT.forEach(([v, label]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = label; if (v === a) o.selected = true;
+      as.appendChild(o);
+    });
+    as.onchange = e => { RULES[i][1] = e.target.value; };
+    const up = document.createElement("button");
+    up.className = "mini"; up.textContent = "↑";
+    up.onclick = () => {
+      if (i > 0) { const t = RULES[i - 1]; RULES[i - 1] = RULES[i]; RULES[i] = t; drawRules(); }
+    };
+    const del = document.createElement("button");
+    del.className = "mini"; del.textContent = "×";
+    del.onclick = () => { RULES.splice(i, 1); drawRules(); };
+    row.append(ix, cs, arrow, as, up, del);
+    box.appendChild(row);
+  });
+}
+
+// ====== 붙이기 ======
+function bind() {
+  canvas = document.getElementById("cv");
+  ctx = canvas.getContext("2d");
+  window.addEventListener("resize", fit);
+  buildGrid();
+
+  const num = (key, id, fmt) => {
+    const el = document.getElementById("in_" + id);
+    const out = document.getElementById("out_" + id);
+    const show = () => { out.textContent = fmt ? fmt(S[key]) : S[key]; };
+    el.value = S[key];
+    el.addEventListener("input", e => { S[key] = parseFloat(e.target.value); show(); });
+    show();
+  };
+  num("thr", "thr", v => v + " mm");
+  num("speed", "speed");
+  num("turnSpeed", "turn");
+  num("noise", "noise", v => "±" + v + " mm");
+  num("minr", "minr", v => v + " mm");
+  num("miss", "miss", v => v + " %");
+  num("slip", "slip", v => v + "°");
+
+  const G = id => document.getElementById(id);
+  G("btn_go").onclick = () => {
+    S.running = !S.running;
+    S.stepping = false;
+    G("btn_go").textContent = S.running ? "정지" : "출발";
+    if (S.running) S.sinceBest = 0;
+    else S.msg = S.anim ? "멈춤 (칸을 건너는 중)" : "멈춤";
+  };
+  G("btn_step").onclick = () => {
+    S.running = false; G("btn_go").textContent = "출발";
+    S.stepping = true;
+    if (!S.anim && !(S.queue && S.queue.length)) startStep();
+  };
+  G("btn_reset").onclick = () => {
+    S.running = false; G("btn_go").textContent = "출발"; resetRobot();
+  };
+  G("btn_clear").onclick = () => {
+    S.wins = S.crashes = S.stalls = 0; toast("기록을 지웠습니다");
+  };
+  G("btn_true").onclick = () => {
+    S.showTrue = !S.showTrue;
+    G("btn_true").classList.toggle("on", S.showTrue);
+    G("btn_true").textContent = S.showTrue ? "참값 숨기기" : "참값 함께 보기";
+    toast(S.showTrue ? "잡음 없는 참값을 함께 보여 줍니다" : "잰 값만 보여 줍니다");
+  };
+  G("btn_add").onclick = () => { RULES.push(["always", "go_front"]); drawRules(); };
+  const setPreset = (k, hint) => {
+    RULES = PRESETS[k].map(r => r.slice());
+    drawRules();
+    G("rule_hint").textContent = hint;
+  };
+  G("btn_left").onclick = () => setPreset("left",
+    "왼손을 벽에 대고 걷는 것과 같다 — 왼쪽이 열려 있으면 무조건 왼쪽.");
+  G("btn_right").onclick = () => setPreset("right",
+    "오른손을 벽에 대고 걷는다. 미로가 같아도 지나는 길이 달라진다.");
+  G("btn_front").onclick = () => setPreset("front",
+    "앞이 열렸으면 계속 직진한다. 갈림길에서 길을 놓치기 쉽다.");
+
+  G("btn_maze").onclick = () => { S.mazeIx = (S.mazeIx + 1) % 4; setMaze(preset(S.mazeIx)); };
+  G("btn_new").onclick = () => {
+    const n = 5 + Math.floor(Math.random() * 2);
+    setMaze(generate(n, n, 2));
+  };
+  G("btn_draw").onclick = () => {
+    S.drawing = !S.drawing;
+    G("btn_draw").classList.toggle("on", S.drawing);
+    toast(S.drawing ? "벽을 누르면 생기고 지워집니다" : "그리기를 껐습니다");
+  };
+  G("btn_teacher").onclick = () => {
+    S.teacher = !S.teacher;
+    G("teacher").classList.toggle("hide", !S.teacher);
+    G("btn_teacher").textContent = S.teacher ? "교사용 닫기" : "교사용 열기";
+  };
+  const env = (noise, minr, miss, slip, text) => () => {
+    S.noise = noise; S.minr = minr; S.miss = miss; S.slip = slip;
+    for (const id of ["noise", "minr", "miss", "slip"]) {
+      const el = document.getElementById("in_" + id);
+      el.value = S[id];
+      el.dispatchEvent(new Event("input"));
+    }
+    toast(text);
+  };
+  G("btn_env1").onclick = env(60, 90, 2, 0,
+    "환경 ① 검은 무광 벽 — 빛이 되돌아오지 않아 벽을 놓칩니다");
+  G("btn_env2").onclick = env(180, 90, 3, 0,
+    "환경 ② 유리·거울·금속 벽 — 빛이 비껴 나가 벽이 멀리 찍힙니다");
+  G("btn_env3").onclick = env(10, 90, 0, 12,
+    "환경 ③ 미끄러운 바닥 — 라이다는 멀쩡한데 몸이 틀어집니다");
+  G("btn_env0").onclick = env(10, 90, 0, 0, "환경을 처음 상태로 되돌렸습니다");
+
+  // 미로 그리기 — 칸의 가장자리를 누르면 그쪽 벽이 생기고 지워진다
+  canvas.addEventListener("click", e => {
+    if (!S.drawing) return;
+    const r = canvas.getBoundingClientRect();
+    const mx = (e.clientX - r.left - OX) / PX, my = (e.clientY - r.top - OY) / PX;
+    const x = Math.floor(mx / CELL), y = Math.floor(my / CELL);
+    if (x < 0 || y < 0 || x >= S.maze.w || y >= S.maze.h) return;
+    const ox = mx - x * CELL, oy = my - y * CELL;
+    const d = [oy, CELL - ox, CELL - oy, ox];             // 북 동 남 서 가장자리까지
+    const di = d.indexOf(Math.min(...d));
+    const cell = S.maze.g[y][x];
+    const now = !cell[DIRS[di][2]];
+    cell[DIRS[di][2]] = now;
+    const nx = x + DIRS[di][0], ny = y + DIRS[di][1];
+    if (nx >= 0 && ny >= 0 && nx < S.maze.w && ny < S.maze.h) {
+      S.maze.g[ny][nx][DIRS[di][3]] = now;
+    }
+    S.maze.name = "직접 그린 미로";
+    document.getElementById("maze_name").textContent =
+      "지금 미로 : " + S.maze.name + "  (" + S.maze.w + "x" + S.maze.h + " 칸)";
+    resetRobot();
+  });
+
+  drawRules();
+  setMaze(preset(0));
+  requestAnimationFrame(tick);
+}
+bind();
+</script></body></html>
