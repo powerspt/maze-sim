@@ -22,10 +22,14 @@ button.warn { background: #fdecea; border-color: #f3c9c4; color: #a8352c; }
 button.on { background: #e8f0fe; border-color: #9db8e8; color: #1d4ea8; }
 .btnrow { display: flex; flex-wrap: wrap; gap: 6px; }
 .btnrow button { flex: 1 1 calc(50% - 3px); min-width: 0; }
+.langrow { display: flex; gap: 6px; margin-top: 8px; }
+.langbtn { font-size: 12px; padding: 4px 10px; border-radius: 999px; flex: 0 0 auto; }
+.langbtn.on { background: #2e6fd9; color: #fff; border-color: #2e6fd9; }
 .cap { font-size: 11.5px; line-height: 1.5; color: #6b7280; margin: 6px 0 2px; }
 .nums { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; color: #444;
         margin-top: 8px; }
 .nums b { color: #111; }
+.nums i { font-style: normal; }
 .badge { display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12.5px;
          background: #eee; color: #555; margin-top: 8px; }
 .prog { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-top: 8px; }
@@ -70,100 +74,91 @@ canvas { border-radius: 10px; background: #fff; }
 <div style="display:flex; gap:12px; padding:12px; height:100vh;">
   <div class="sideL">
     <div>
-      <h1>비글 미로 찾기 시뮬레이터</h1>
-      <div class="sub">라이다로 잰 거리로 벽인지 아닌지를 가른다</div>
+      <h1 data-t="title"></h1>
+      <div class="sub" data-t="sub"></div>
+      <div class="langrow">
+        <button class="langbtn on" data-lang="ko">한국어</button>
+        <button class="langbtn" data-lang="en">English</button>
+        <button class="langbtn" data-lang="ru">Русский</button>
+      </div>
     </div>
 
     <div class="card">
       <div class="btnrow">
-        <button id="btn_go" class="go">출발</button>
-        <button id="btn_step">한 칸만</button>
-        <button id="btn_reset">처음으로</button>
-        <button id="btn_clear">기록 지우기</button>
+        <button id="btn_go" class="go" data-t="go"></button>
+        <button id="btn_step" data-t="step"></button>
+        <button id="btn_reset" data-t="toStart"></button>
+        <button id="btn_clear" data-t="clear"></button>
       </div>
-      <div class="row"><label>벽 판정 기준</label>
+      <div class="row"><label data-t="lThr"></label>
         <input id="in_thr" type="range" min="100" max="700" step="10">
         <span class="out" id="out_thr"></span></div>
-      <div class="row"><label>속도</label>
+      <div class="row"><label data-t="lSpeed"></label>
         <input id="in_speed" type="range" min="0.3" max="3" step="0.1">
         <span class="out" id="out_speed"></span></div>
-      <div class="row"><label>회전 속도</label>
+      <div class="row"><label data-t="lTurn"></label>
         <input id="in_turn" type="range" min="0.3" max="3" step="0.1">
         <span class="out" id="out_turn"></span></div>
-      <div class="cap">기준보다 가까우면 '벽', 멀면 '열림'으로 본다.
-        한 칸은 360mm — 바로 앞이 벽이면 160mm, 한 칸 열렸으면 520mm 로 찍힌다.<br>
-        <b>정지</b>를 누르면 칸을 건너는 도중에도 그 자리에서 멈춘다. 멈춘 자리의
-        라이다 값이 오른쪽 3x3 에 그대로 남는다.</div>
-      <div class="badge" id="badge">상태 : 멈춤</div>
+      <div class="cap" data-th="capMeasure"></div>
+      <div class="badge" id="badge"></div>
       <div class="prog"><div class="pfill" id="prog_fill"></div></div>
       <div class="nums">
-        <span>진행 <b id="v_prog">0%</b></span>
-        <span>탈출 <b id="v_win">0</b></span>
-        <span>충돌 <b id="v_crash">0</b></span>
-        <span>맴돌기 <b id="v_stall">0</b></span>
-        <span>간 칸 <b id="v_step">0</b></span>
-        <span>회전 <b id="v_turn">0</b></span>
-        <span>방향 오차 <b id="v_drift">0°</b></span>
-        <span>쏠림 <b id="v_lat">0</b></span>
+        <span><i data-t="nProg"></i> <b id="v_prog">0%</b></span>
+        <span><i data-t="nWin"></i> <b id="v_win">0</b></span>
+        <span><i data-t="nCrash"></i> <b id="v_crash">0</b></span>
+        <span><i data-t="nStall"></i> <b id="v_stall">0</b></span>
+        <span><i data-t="nStep"></i> <b id="v_step">0</b></span>
+        <span><i data-t="nTurn"></i> <b id="v_turn">0</b></span>
+        <span><i data-t="nDrift"></i> <b id="v_drift">0°</b></span>
+        <span><i data-t="nLat"></i> <b id="v_lat">0</b></span>
       </div>
-      <div class="cap">탈출 = 도착 칸에 들어감 · 충돌 = 벽이 있는데 앞으로 감
-        · 맴돌기 = 60번 움직였는데도 도착에 더 가까워지지 못함</div>
+      <div class="cap" data-th="capCount"></div>
     </div>
 
     <div class="card">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <b style="font-size:13.5px;">로봇이 따르는 규칙</b>
-        <span class="cap" style="margin:0;">위에서부터 맞는 것 하나를 고른다</span>
+        <b style="font-size:13.5px;" data-t="rulesTitle"></b>
+        <span class="cap" style="margin:0;" data-t="rulesPick"></span>
       </div>
       <div class="rules" id="rules"></div>
       <div class="btnrow" style="margin-top:6px;">
-        <button id="btn_add">+ 줄 넣기</button>
-        <button id="btn_left">좌수법</button>
-        <button id="btn_right">우수법</button>
-        <button id="btn_front">정면 우선</button>
+        <button id="btn_add" data-t="addRule"></button>
+        <button id="btn_left" data-t="pLeft"></button>
+        <button id="btn_right" data-t="pRight"></button>
+        <button id="btn_front" data-t="pFront"></button>
       </div>
-      <div class="cap" id="rule_hint">왼손을 벽에 대고 걷는 것과 같다 — 왼쪽이 열려 있으면 무조건 왼쪽.</div>
-      <div class="cap">'…으로 가기' 는 그쪽으로 돌고 한 칸 나아간다.
-        '…만 돌기' 는 제자리에서 방향만 바꾼다 — 그것만 쓰면 제자리를 맴돈다.</div>
+      <div class="cap" id="rule_hint"></div>
+      <div class="cap" data-th="capAct"></div>
     </div>
 
     <div class="card">
       <div class="btnrow">
-        <button id="btn_maze">다른 미로</button>
-        <button id="btn_new">새로 뽑기</button>
-        <button id="btn_draw">직접 그리기</button>
-        <button id="btn_teacher">교사용 열기</button>
+        <button id="btn_maze" data-t="mazeNext"></button>
+        <button id="btn_new" data-t="mazeNew"></button>
+        <button id="btn_draw" data-t="mazeDraw"></button>
+        <button id="btn_teacher"></button>
       </div>
       <div class="cap" id="maze_name"></div>
       <div id="teacher" class="hide">
-        <div class="row"><label>라이다 잡음</label>
+        <div class="row"><label data-t="lNoise"></label>
           <input id="in_noise" type="range" min="0" max="220" step="5">
           <span class="out" id="out_noise"></span></div>
-        <div class="row"><label>최소 측정 거리</label>
+        <div class="row"><label data-t="lMinr"></label>
           <input id="in_minr" type="range" min="50" max="420" step="10">
           <span class="out" id="out_minr"></span></div>
-        <div class="row"><label>벽 놓칠 확률</label>
+        <div class="row"><label data-t="lMiss"></label>
           <input id="in_miss" type="range" min="0" max="15" step="1">
           <span class="out" id="out_miss"></span></div>
-        <div class="row"><label>회전 오차</label>
+        <div class="row"><label data-t="lSlip"></label>
           <input id="in_slip" type="range" min="0" max="15" step="1">
           <span class="out" id="out_slip"></span></div>
         <div class="btnrow">
-          <button id="btn_env1" class="warn">환경 ① 검은 무광 벽</button>
-          <button id="btn_env2" class="warn">환경 ② 유리·금속 벽</button>
-          <button id="btn_env3" class="warn">환경 ③ 미끄러운 바닥</button>
-          <button id="btn_env0">원래대로</button>
+          <button id="btn_env1" class="warn" data-t="env1"></button>
+          <button id="btn_env2" class="warn" data-t="env2"></button>
+          <button id="btn_env3" class="warn" data-t="env3"></button>
+          <button id="btn_env0" data-t="env0"></button>
         </div>
-        <div class="cap">라이다는 스스로 빛을 쏘아 되돌아오는 시간을 잰다.
-          그래서 <b>방이 밝은지 어두운지는 상관이 없다</b>. 흔들리는 것은 벽의 재질과 각도다.<br>
-          환경 ① <b>검은 무광 벽</b> — 빛을 거의 되돌려 주지 않아 가끔 벽을 놓친다
-          (잡음 ±60 · 놓침 2%, 다섯 판에 한 판쯤 박는다)<br>
-          환경 ② <b>유리·거울·금속 벽</b> — 빛이 비껴 나가 벽이 없는 것처럼 멀리 찍힌다
-          (잡음 ±180 · 놓침 3%, 절반 넘게 박는다)<br>
-          환경 ③ <b>미끄러운 바닥</b> — 라이다는 멀쩡하다. 바퀴가 미끄러져 몸이 틀어지고,
-          틀어진 채로 재니 값이 어긋나며 옆으로 쏠린다 (회전 오차 12°)<br>
-          잡음은 ±150 까지는 멀쩡하다. 벽 160 에 150 을 더해도 기준 300 을 못 넘기 때문이다.<br>
-          최소 측정 거리는 실물 라이다가 90mm 다. 360mm 로 올리면 벽이 모두 열려 보인다.</div>
+        <div class="cap" data-th="capEnv"></div>
       </div>
     </div>
   </div>
@@ -174,28 +169,218 @@ canvas { border-radius: 10px; background: #fff; }
 
   <div class="sideR">
     <div class="card">
-      <b style="font-size:13.5px;">라이다가 지금 보는 값</b>
-      <div class="cap" style="margin-top:3px;">여덟 방향 거리 (mm)<br>위쪽이 로봇이 보는 앞</div>
+      <b style="font-size:13.5px;" data-t="lidTitle"></b>
+      <div class="cap" style="margin-top:3px;" data-th="lidSub"></div>
       <div class="grid3" id="grid3"></div>
       <div class="btnrow" style="margin-top:7px;">
-        <button id="btn_true">참값 함께 보기</button>
+        <button id="btn_true"></button>
       </div>
-      <div class="cap">
-        <span style="color:#1d4ea8;">■</span> 기준보다 멀다 = 열림 ·
-        <span style="color:#a8352c;">■</span> 기준보다 가깝다 = 벽<br>
-        칸 가운데에서 재면 벽은 <b>160</b>, 한 칸 열렸으면 <b>520</b>,
-        두 칸이면 <b>880</b> 이다 (360 씩 늘어난다).
-        대각선은 모서리까지 <b>226</b> — 160의 √2 배다.
-        모서리가 양쪽 다 열려 있으면 그 틈으로 더 멀리 나간다.<br>
-        <b>∞</b> 는 되돌아온 빛이 없어 못 잰 것이다.<br>
-        달리는 중에 <b>정지</b>를 누르면 그 자리의 값이 멈춘다 —
-        "여기서는 얼마로 찍힐까" 를 먼저 맞혀 보게 한다.
-      </div>
+      <div class="cap" data-th="capLid"></div>
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
 <script>
+// ====== 말 (한국어 · English · Русский) ======
+//   화면 글은 모두 여기 모여 있다. data-t 는 글자만, data-th 는 <b> 가 섞인 줄이다.
+//   %1 %2 %3 은 숫자가 들어갈 자리다.
+const T = {
+  ko: {
+    title: "비글 미로 찾기 시뮬레이터",
+    sub: "라이다로 잰 거리로 벽인지 아닌지를 가른다",
+    go: "출발", stop: "정지", step: "한 칸만", toStart: "처음으로", clear: "기록 지우기",
+    lThr: "벽 판정 기준", lSpeed: "속도", lTurn: "회전 속도",
+    capMeasure: "기준보다 가까우면 '벽', 멀면 '열림'으로 본다. 한 칸은 360mm — 바로 앞이 벽이면 160mm, 한 칸 열렸으면 520mm 로 찍힌다.<br><b>정지</b>를 누르면 칸을 건너는 도중에도 그 자리에서 멈춘다. 멈춘 자리의 라이다 값이 오른쪽 3x3 에 그대로 남는다.",
+    nProg: "진행", nWin: "탈출", nCrash: "충돌", nStall: "맴돌기",
+    nStep: "간 칸", nTurn: "회전", nDrift: "방향 오차", nLat: "쏠림",
+    capCount: "탈출 = 도착 칸에 들어감 · 충돌 = 벽이 있는데 앞으로 감 · 맴돌기 = 60번 움직였는데도 도착에 더 가까워지지 못함",
+    rulesTitle: "로봇이 따르는 규칙", rulesPick: "위에서부터 맞는 것 하나를 고른다",
+    addRule: "+ 줄 넣기", pLeft: "좌수법", pRight: "우수법", pFront: "정면 우선",
+    hintLeft: "왼손을 벽에 대고 걷는 것과 같다 — 왼쪽이 열려 있으면 무조건 왼쪽.",
+    hintRight: "오른손을 벽에 대고 걷는다. 미로가 같아도 지나는 길이 달라진다.",
+    hintFront: "앞이 열렸으면 계속 직진한다. 갈림길에서 길을 놓치기 쉽다.",
+    capAct: "'…으로 가기' 는 그쪽으로 돌고 한 칸 나아간다. '…만 돌기' 는 제자리에서 방향만 바꾼다 — 그것만 쓰면 제자리를 맴돈다.",
+    mazeNext: "다른 미로", mazeNew: "새로 뽑기", mazeDraw: "직접 그리기",
+    teacherOpen: "교사용 열기", teacherClose: "교사용 닫기",
+    lNoise: "라이다 잡음", lMinr: "최소 측정 거리", lMiss: "벽 놓칠 확률", lSlip: "회전 오차",
+    env1: "환경 ① 검은 무광 벽", env2: "환경 ② 유리·금속 벽",
+    env3: "환경 ③ 미끄러운 바닥", env0: "원래대로",
+    capEnv: "라이다는 스스로 빛을 쏘아 되돌아오는 시간을 잰다. 그래서 <b>방이 밝은지 어두운지는 상관이 없다</b>. 흔들리는 것은 벽의 재질과 각도다.<br>환경 ① <b>검은 무광 벽</b> — 빛을 거의 되돌려 주지 않아 가끔 벽을 놓친다 (잡음 ±60 · 놓침 2%, 다섯 판에 한 판쯤 박는다)<br>환경 ② <b>유리·거울·금속 벽</b> — 빛이 비껴 나가 벽이 없는 것처럼 멀리 찍힌다 (잡음 ±180 · 놓침 3%, 절반 넘게 박는다)<br>환경 ③ <b>미끄러운 바닥</b> — 라이다는 멀쩡하다. 바퀴가 미끄러져 몸이 틀어지고, 틀어진 채로 재니 값이 어긋나며 옆으로 쏠린다 (회전 오차 12°)<br>잡음은 ±150 까지는 멀쩡하다. 벽 160 에 150 을 더해도 기준 300 을 못 넘기 때문이다.<br>최소 측정 거리는 실물 라이다가 90mm 다. 360mm 로 올리면 벽이 모두 열려 보인다.",
+    lidTitle: "라이다가 지금 보는 값",
+    lidSub: "여덟 방향 거리 (mm)<br>위쪽이 로봇이 보는 앞",
+    trueShow: "참값 함께 보기", trueHide: "참값 숨기기",
+    capLid: "<span style='color:#1d4ea8;'>■</span> 기준보다 멀다 = 열림 · <span style='color:#a8352c;'>■</span> 기준보다 가깝다 = 벽<br>칸 가운데에서 재면 벽은 <b>160</b>, 한 칸 열렸으면 <b>520</b>, 두 칸이면 <b>880</b> 이다 (360 씩 늘어난다). 대각선은 모서리까지 <b>226</b> — 160의 √2 배다. 모서리가 양쪽 다 열려 있으면 그 틈으로 더 멀리 나간다.<br><b>∞</b> 는 되돌아온 빛이 없어 못 잰 것이다.<br>달리는 중에 <b>정지</b>를 누르면 그 자리의 값이 멈춘다 — \"여기서는 얼마로 찍힐까\" 를 먼저 맞혀 보게 한다.",
+    stateFmt: "상태 : %1",
+    stStop: "멈춤", stRun: "달리는 중", stMid: "멈춤 (칸을 건너는 중)",
+    stNoRule: "멈춤 — 맞는 규칙이 없다",
+    mCrash: "충돌 — 벽이 있는데 앞으로 갔습니다",
+    mScrape: "충돌 — 옆으로 %1mm 쏠려 벽을 긁었습니다",
+    mWin: "탈출! (%1번째) — %2칸 · 회전 %3번",
+    mStall: "맴돌기 — %1번 움직였는데 도착에 더 가까워지지 못했습니다",
+    mCleared: "기록을 지웠습니다",
+    mTrueOn: "잡음 없는 참값을 함께 보여 줍니다", mTrueOff: "잰 값만 보여 줍니다",
+    mDrawOn: "벽을 누르면 생기고 지워집니다", mDrawOff: "그리기를 껐습니다",
+    mEnv1: "환경 ① 검은 무광 벽 — 빛이 되돌아오지 않아 벽을 놓칩니다",
+    mEnv2: "환경 ② 유리·거울·금속 벽 — 빛이 비껴 나가 벽이 멀리 찍힙니다",
+    mEnv3: "환경 ③ 미끄러운 바닥 — 라이다는 멀쩡한데 몸이 틀어집니다",
+    mEnv0: "환경을 처음 상태로 되돌렸습니다",
+    mazeNow: "지금 미로 : %1  (%2x%3 칸)",
+    mz0: "수업용 (기본)", mz1: "수업용 작은 미로 (복층 한 층)", mz2: "ㄹ 자",
+    mzRand: "무작위", mzDrawn: "직접 그린 미로",
+    start: "출발", goal: "도착",
+    d0: "앞", d1: "앞오른", d2: "오른", d3: "뒤오른",
+    d4: "뒤", d5: "뒤왼", d6: "왼", d7: "앞왼",
+    h0: "북", h1: "동", h2: "남", h3: "서",
+    here: "지금 자리", facing: "%1쪽을 봄", truePrefix: "참 %1",
+    left_open: "왼쪽이 열림", front_open: "앞이 열림", right_open: "오른쪽이 열림",
+    left_wall: "왼쪽이 벽", front_wall: "앞이 벽", right_wall: "오른쪽이 벽",
+    always: "언제나",
+    go_left: "왼쪽으로 가기", go_front: "앞으로 가기", go_right: "오른쪽으로 가기",
+    go_back: "뒤로 돌아가기", turn_left: "왼쪽만 돌기", turn_right: "오른쪽만 돌기",
+    act_stop: "멈추기"
+  },
+  en: {
+    title: "Beagle maze-solving simulator",
+    sub: "The distance the LiDAR measures decides: wall or opening",
+    go: "Start", stop: "Stop", step: "One cell", toStart: "To the start", clear: "Clear record",
+    lThr: "Wall threshold", lSpeed: "Speed", lTurn: "Turn speed",
+    capMeasure: "Closer than the threshold is a 'wall', farther is 'open'. One cell is 360mm — a wall right ahead reads 160mm, one open cell reads 520mm.<br>Press <b>Stop</b> and the robot halts where it is, even in mid-crossing. The LiDAR reading at that spot stays in the 3x3 on the right.",
+    nProg: "Progress", nWin: "Escapes", nCrash: "Crashes", nStall: "Circling",
+    nStep: "Cells", nTurn: "Turns", nDrift: "Heading error", nLat: "Sideways drift",
+    capCount: "Escape = reached the goal cell · Crash = drove forward into a wall · Circling = 60 moves without getting any closer to the goal",
+    rulesTitle: "Rules the robot follows", rulesPick: "the first matching line wins",
+    addRule: "+ Add line", pLeft: "Left-hand rule", pRight: "Right-hand rule", pFront: "Forward first",
+    hintLeft: "Like walking with your left hand on the wall — if the left is open, go left.",
+    hintRight: "Walking with your right hand on the wall. Same maze, different path.",
+    hintFront: "Keep going straight while the front is open. Easy to miss turns at a junction.",
+    capAct: "'Go …' turns that way and then moves one cell. 'Turn … only' changes the heading on the spot — use nothing but those and the robot spins in place.",
+    mazeNext: "Another maze", mazeNew: "New random one", mazeDraw: "Draw your own",
+    teacherOpen: "Open teacher panel", teacherClose: "Close teacher panel",
+    lNoise: "LiDAR noise", lMinr: "Min. range", lMiss: "Wall-miss chance", lSlip: "Turn error",
+    env1: "① Matte black walls", env2: "② Glass · metal walls",
+    env3: "③ Slippery floor", env0: "Reset",
+    capEnv: "The LiDAR sends out its own light and times the echo, so <b>it makes no difference whether the room is bright or dark</b>. What shakes the reading is the material and the angle of the wall.<br>Env ① <b>matte black walls</b> — almost no light comes back, so a wall is missed now and then (noise ±60 · miss 2%, about one crash in five runs)<br>Env ② <b>glass, mirror or metal walls</b> — the light glances off and the wall reads far away, as if it were not there (noise ±180 · miss 3%, crashes more than half the time)<br>Env ③ <b>slippery floor</b> — the LiDAR is fine. The wheels slip, the body ends up askew, and measuring while askew throws the readings off and pushes the robot sideways (turn error 12°)<br>Noise up to ±150 is harmless: a wall at 160 plus 150 still does not pass the threshold of 300.<br>The real LiDAR has a minimum range of 90mm. Raise it to 360mm and every wall looks open.",
+    lidTitle: "What the LiDAR sees now",
+    lidSub: "Eight directions, in mm<br>Up is the robot's front",
+    trueShow: "Show true values", trueHide: "Hide true values",
+    capLid: "<span style='color:#1d4ea8;'>■</span> farther than the threshold = open · <span style='color:#a8352c;'>■</span> closer = wall<br>Measured from the centre of a cell, a wall reads <b>160</b>, one open cell <b>520</b>, two cells <b>880</b> (360 at a time). A diagonal reaches the corner at <b>226</b> — 160 times √2. If both sides of a corner are open, the beam slips through and goes farther.<br><b>∞</b> means no light came back and nothing could be measured.<br>Press <b>Stop</b> while it runs and the readings freeze where it stands — ask \"what will it read here?\" before you look.",
+    stateFmt: "Status : %1",
+    stStop: "stopped", stRun: "running", stMid: "stopped (mid-crossing)",
+    stNoRule: "stopped — no rule matched",
+    mCrash: "Crash — drove forward into a wall",
+    mScrape: "Crash — drifted %1mm sideways and scraped the wall",
+    mWin: "Escaped! (#%1) — %2 cells · %3 turns",
+    mStall: "Circling — %1 moves without getting any closer to the goal",
+    mCleared: "Record cleared",
+    mTrueOn: "Showing the noise-free true values as well", mTrueOff: "Showing measured values only",
+    mDrawOn: "Click the edge of a cell to add or remove a wall", mDrawOff: "Drawing is off",
+    mEnv1: "Env ① matte black walls — little light comes back, so walls get missed",
+    mEnv2: "Env ② glass, mirror or metal walls — the light glances off and walls read far away",
+    mEnv3: "Env ③ slippery floor — the LiDAR is fine, but the body goes askew",
+    mEnv0: "Conditions back to the start",
+    mazeNow: "Maze : %1  (%2x%3 cells)",
+    mz0: "Class maze (default)", mz1: "Small class maze (one floor of the two-level maze)",
+    mz2: "Zigzag", mzRand: "Random", mzDrawn: "Your own maze",
+    start: "START", goal: "GOAL",
+    d0: "front", d1: "fr-right", d2: "right", d3: "bk-right",
+    d4: "back", d5: "bk-left", d6: "left", d7: "fr-left",
+    h0: "N", h1: "E", h2: "S", h3: "W",
+    here: "here now", facing: "facing %1", truePrefix: "true %1",
+    left_open: "left is open", front_open: "front is open", right_open: "right is open",
+    left_wall: "left is a wall", front_wall: "front is a wall", right_wall: "right is a wall",
+    always: "always",
+    go_left: "go left", go_front: "go forward", go_right: "go right",
+    go_back: "turn back and go", turn_left: "turn left only", turn_right: "turn right only",
+    act_stop: "stop"
+  },
+  ru: {
+    title: "Симулятор прохождения лабиринта Beagle",
+    sub: "Расстояние, измеренное лидаром, решает: стена или проход",
+    go: "Старт", stop: "Стоп", step: "Одна клетка", toStart: "В начало", clear: "Сбросить счёт",
+    lThr: "Порог стены", lSpeed: "Скорость", lTurn: "Скорость поворота",
+    capMeasure: "Ближе порога — «стена», дальше — «проход». Одна клетка 360 мм: стена прямо перед роботом читается как 160 мм, одна открытая клетка — как 520 мм.<br>Нажмите <b>Стоп</b> — робот остановится там, где стоит, даже посреди клетки. Показания лидара в этой точке останутся в сетке 3x3 справа.",
+    nProg: "Пройдено", nWin: "Выходов", nCrash: "Столкновений", nStall: "Кружит",
+    nStep: "Клеток", nTurn: "Поворотов", nDrift: "Ошибка курса", nLat: "Снос",
+    capCount: "Выход = вошёл в финишную клетку · Столкновение = поехал вперёд в стену · Кружит = 60 действий без приближения к финишу",
+    rulesTitle: "Правила робота", rulesPick: "срабатывает первое подходящее",
+    addRule: "+ Строка", pLeft: "Правило левой руки", pRight: "Правило правой руки",
+    pFront: "Сначала вперёд",
+    hintLeft: "Как идти, держась левой рукой за стену — если слева открыто, всегда налево.",
+    hintRight: "Идём, держась правой рукой за стену. Лабиринт тот же, а путь другой.",
+    hintFront: "Пока впереди открыто — едем прямо. На развилках легко пропустить поворот.",
+    capAct: "«Ехать …» — повернуть туда и проехать одну клетку, «развернуться» — то же назад. «Поворот …» — сменить направление на месте; если пользоваться только этим, робот будет крутиться на месте.",
+    mazeNext: "Другой лабиринт", mazeNew: "Новый случайный", mazeDraw: "Нарисовать свой",
+    teacherOpen: "Панель преподавателя", teacherClose: "Закрыть панель",
+    lNoise: "Шум лидара", lMinr: "Мин. дальность", lMiss: "Пропуск стены", lSlip: "Ошибка поворота",
+    env1: "① Чёрные матовые стены", env2: "② Стекло · металл",
+    env3: "③ Скользкий пол", env0: "Как было",
+    capEnv: "Лидар сам посылает свет и измеряет время возврата, поэтому <b>светло в помещении или темно — неважно</b>. Показания сбивают материал и угол стены.<br>Среда ① <b>чёрные матовые стены</b> — света почти не возвращается, и стена иногда теряется (шум ±60 · пропуск 2%, примерно одно столкновение на пять попыток)<br>Среда ② <b>стеклянные, зеркальные или металлические стены</b> — свет уходит вскользь, и стена читается далеко, будто её нет (шум ±180 · пропуск 3%, столкновения более чем в половине попыток)<br>Среда ③ <b>скользкий пол</b> — лидар исправен. Колёса проскальзывают, корпус разворачивает, и измерения со смещённого курса уводят робота вбок (ошибка поворота 12°)<br>Шум до ±150 безвреден: 160 у стены плюс 150 всё равно не превышает порог 300.<br>У настоящего лидара минимальная дальность 90 мм. Поднимите её до 360 мм — и все стены покажутся проходами.",
+    lidTitle: "Что лидар видит сейчас",
+    lidSub: "Восемь направлений, мм<br>Вверху — перёд робота",
+    trueShow: "Показать истинные значения", trueHide: "Скрыть истинные значения",
+    capLid: "<span style='color:#1d4ea8;'>■</span> дальше порога = проход · <span style='color:#a8352c;'>■</span> ближе порога = стена<br>Из центра клетки стена читается как <b>160</b>, одна открытая клетка — <b>520</b>, две — <b>880</b> (шаг 360). По диагонали до угла <b>226</b> — это 160 × √2. Если обе стороны угла открыты, луч уходит в щель дальше.<br><b>∞</b> — свет не вернулся, измерить не удалось.<br>Нажмите <b>Стоп</b> на ходу — показания замрут на месте: спросите «сколько здесь будет?» прежде, чем смотреть.",
+    stateFmt: "Состояние : %1",
+    stStop: "стоит", stRun: "едет", stMid: "стоит (посреди клетки)",
+    stNoRule: "стоит — ни одно правило не подошло",
+    mCrash: "Столкновение — поехал вперёд в стену",
+    mScrape: "Столкновение — снесло на %1 мм вбок и задел стену",
+    mWin: "Выход! (%1-й) — %2 клеток · %3 поворотов",
+    mStall: "Кружит — %1 действий без приближения к финишу",
+    mCleared: "Счёт сброшен",
+    mTrueOn: "Показываем и истинные значения без шума", mTrueOff: "Показываем только измеренные значения",
+    mDrawOn: "Нажмите на грань клетки — стена появится или исчезнет", mDrawOff: "Рисование выключено",
+    mEnv1: "Среда ① чёрные матовые стены — свет не возвращается, стены теряются",
+    mEnv2: "Среда ② стекло, зеркало, металл — свет уходит вскользь, стена читается далеко",
+    mEnv3: "Среда ③ скользкий пол — лидар исправен, но корпус разворачивает",
+    mEnv0: "Условия возвращены к началу",
+    mazeNow: "Лабиринт : %1  (%2x%3 клеток)",
+    mz0: "Учебный (основной)", mz1: "Малый учебный (один этаж двухуровневого)",
+    mz2: "Змейка", mzRand: "Случайный", mzDrawn: "Нарисованный вами",
+    start: "СТАРТ", goal: "ФИНИШ",
+    d0: "перёд", d1: "перёд-пр.", d2: "право", d3: "зад-пр.",
+    d4: "зад", d5: "зад-лев.", d6: "лево", d7: "перёд-лев.",
+    h0: "С", h1: "В", h2: "Ю", h3: "З",
+    here: "здесь", facing: "смотрит на %1", truePrefix: "ист. %1",
+    left_open: "слева открыто", front_open: "впереди открыто", right_open: "справа открыто",
+    left_wall: "слева стена", front_wall: "впереди стена", right_wall: "справа стена",
+    always: "всегда",
+    go_left: "ехать налево", go_front: "ехать вперёд", go_right: "ехать направо",
+    go_back: "развернуться", turn_left: "поворот налево", turn_right: "поворот направо",
+    act_stop: "стоять"
+  }
+};
+let LANG = "ko";
+function t(k, a, b, c) {
+  let v = (T[LANG] && T[LANG][k]) || T.ko[k] || k;
+  if (a !== undefined) v = v.replace("%1", a);
+  if (b !== undefined) v = v.replace("%2", b);
+  if (c !== undefined) v = v.replace("%3", c);
+  return v;
+}
+function applyLang(code) {
+  LANG = code;
+  try { localStorage.setItem("mazesim_lang", code); } catch (e) {}
+  document.documentElement.lang = code;
+  document.title = t("title");
+  document.querySelectorAll("[data-t]").forEach(el => {
+    el.textContent = t(el.getAttribute("data-t"));
+  });
+  document.querySelectorAll("[data-th]").forEach(el => {
+    el.innerHTML = t(el.getAttribute("data-th"));
+  });
+  document.querySelectorAll(".langbtn").forEach(b => {
+    b.classList.toggle("on", b.getAttribute("data-lang") === code);
+  });
+  const g = id => document.getElementById(id);
+  if (g("btn_go")) g("btn_go").textContent = S.running ? t("stop") : t("go");
+  if (g("btn_true")) g("btn_true").textContent = S.showTrue ? t("trueHide") : t("trueShow");
+  if (g("btn_teacher")) g("btn_teacher").textContent = S.teacher ? t("teacherClose") : t("teacherOpen");
+  if (g("rule_hint")) g("rule_hint").textContent = t(S.hintKey || "hintLeft");
+  if (g("rules")) drawRules();
+  if (g("grid3")) buildGrid();
+  if (S.maze) showMazeName();
+}
+
 // ====== 치수 (mm) — 복층 미로 단원과 같다 ======
 const CELL = 360;          // 한 칸 (타일 180mm 두 장)
 const WALLT = 40;          // 벽 두께
@@ -212,7 +397,7 @@ function blank(w, h) {
     for (let x = 0; x < w; x++) row.push({ n: true, e: true, s: true, w: true });
     g.push(row);
   }
-  return { w, h, g, start: [0, h - 1], goal: [w - 1, 0], name: "" };
+  return { w, h, g, start: [0, h - 1], goal: [w - 1, 0], nameKey: "mzRand" };
 }
 const DIRS = [[0, -1, "n", "s"], [1, 0, "e", "w"], [0, 1, "s", "n"], [-1, 0, "w", "e"]];
 
@@ -250,7 +435,7 @@ function generate(w, h, loops) {
     if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
     carve(m, x, y, nx, ny, di);
   }
-  m.name = "무작위";
+  m.nameKey = "mzRand";
   return m;
 }
 
@@ -263,7 +448,7 @@ function preset(which) {
     const Vs = [[1, 3], [0, 2], [2, 2], [2, 1], [0, 0], [3, 0], [4, 1], [4, 2], [3, 3]];
     for (const [x, y] of Hs) carve(m, x, y, x + 1, y, 1);      // 오른쪽 칸과 잇는다
     for (const [x, y] of Vs) carve(m, x, y, x, y + 1, 2);      // 아래 칸과 잇는다
-    m.name = "수업용 (기본)";
+    m.nameKey = "mz0";
     m.start = [0, 4]; m.goal = [4, 0];
     return m;
   }
@@ -271,7 +456,7 @@ function preset(which) {
     const m = blank(3, 2);                 // 길 : 출발(0,1) → (0,0) → (1,0) → (1,1) → (2,1) → 도착(2,0)
     const path = [[0, 1, 0], [0, 0, 1], [1, 0, 2], [1, 1, 1], [2, 1, 0]];
     for (const [x, y, di] of path) carve(m, x, y, x + DIRS[di][0], y + DIRS[di][1], di);
-    m.name = "수업용 작은 미로 (복층 한 층)";
+    m.nameKey = "mz1";
     m.start = [0, 1]; m.goal = [2, 0];
     return m;
   }
@@ -285,12 +470,12 @@ function preset(which) {
         carve(m, ex, y, ex, y - 1, 0);
       }
     }
-    m.name = "ㄹ 자";
+    m.nameKey = "mz2";
     m.start = [0, 3]; m.goal = [0, 0];
     return m;
   }
   const m = generate(5, 5, 2);             // 그 밖에는 무작위
-  m.name = "무작위";
+  m.nameKey = "mzRand";
   return m;
 }
 
@@ -305,25 +490,19 @@ const S = {
   lid: new Array(8).fill(0),                  // 잰 값 (잡음 섞인 것)
   lidT: new Array(8).fill(0),                 // 참값
   drift: 0, lat: 0, showTrue: false,
-  msg: "멈춤", teacher: false, mazeIx: 0
+  msgKey: "stStop", hintKey: "hintLeft", teacher: false, mazeIx: 0
 };
 
 // ====== 규칙 (블록) ======
 //  조건 이름은 짧게 — '조건 → 동작' 한 줄이 좁은 노트북에서도 잘리지 않아야 한다
-const COND = [
-  ["left_open", "왼쪽이 열림"], ["front_open", "앞이 열림"],
-  ["right_open", "오른쪽이 열림"], ["left_wall", "왼쪽이 벽"],
-  ["front_wall", "앞이 벽"], ["right_wall", "오른쪽이 벽"],
-  ["always", "언제나"]
-];
+const COND = ["left_open", "front_open", "right_open",
+              "left_wall", "front_wall", "right_wall", "always"];
 //  '가기' 는 돌고 나서 한 칸 나아간다. '돌기' 는 제자리에서 방향만 바꾼다.
 //  돌기만 쓰면 제자리를 맴돈다 — 그것도 수업에서 보여 줄 거리다.
-const ACT = [
-  ["go_left", "왼쪽으로 가기"], ["go_front", "앞으로 가기"],
-  ["go_right", "오른쪽으로 가기"], ["go_back", "뒤로 돌아가기"],
-  ["turn_left", "왼쪽만 돌기"], ["turn_right", "오른쪽만 돌기"],
-  ["stop", "멈추기"]
-];
+const ACT = ["go_left", "go_front", "go_right", "go_back",
+             "turn_left", "turn_right", "stop"];
+//  'stop' 은 정지 단추의 말과 겹치므로 이름표만 act_stop 으로 찾는다
+const actLabel = v => t(v === "stop" ? "act_stop" : v);
 const PRESETS = {
   left: [["left_open", "go_left"], ["front_open", "go_front"],
          ["right_open", "go_right"], ["always", "go_back"]],
@@ -443,7 +622,7 @@ function startStep() {
   if (S.queue && S.queue.length) { runAction(S.queue.shift()); return; }
   const act = decide();
   if (act === "stop") {
-    S.running = false; S.stepping = false; S.msg = "멈춤 — 맞는 규칙이 없다"; return;
+    S.running = false; S.stepping = false; S.msgKey = "stNoRule"; return;
   }
   // '가기' 는 돌고 나서 나아간다 — 두 동작을 줄줄이 세워 둔다
   const CHAIN = {
@@ -463,7 +642,7 @@ function runAction(act) {
     if (blocked || outside) {                 // 벽이 있는데 갔다 — 충돌
       S.crashes++; S.running = false; S.stepping = false; S.queue = [];
       S.anim = { kind: "bump", t: 0, dur: 0.35 };
-      toast("충돌 — 벽이 있는데 앞으로 갔습니다");
+      toast(t("mCrash"));
       return;
     }
     // 비스듬히 달리면 한 칸 갈 때마다 옆으로 쏠린다. 쏠림이 쌓이면 벽을 긁는다.
@@ -475,14 +654,14 @@ function runAction(act) {
     if (Math.abs(S.lat) > room) {
       S.crashes++; S.running = false; S.stepping = false; S.queue = [];
       S.anim = { kind: "bump", t: 0, dur: 0.35 };
-      toast("충돌 — 옆으로 " + Math.round(Math.abs(S.lat)) + "mm 쏠려 벽을 긁었습니다");
+      toast(t("mScrape", Math.round(Math.abs(S.lat))));
       return;
     }
     S.anim = { kind: "move", t: 0, dur: 0.75 / S.speed, fx: S.cx, fy: S.cy, tx: nx, ty: ny,
                lat0: lat0, lat1: S.lat };
     return;
   }
-  if (act === "stop") { S.running = false; S.stepping = false; S.msg = "멈춤"; return; }
+  if (act === "stop") { S.running = false; S.stepping = false; S.msgKey = "stStop"; return; }
   const turn = act === "turn_left" ? -1 : act === "turn_right" ? 1 : 2;
   const err = (Math.random() * 2 - 1) * S.slip;            // 이번 회전의 오차(도)
   S.anim = { kind: "turn", t: 0, dur: (Math.abs(turn) * 0.45) / S.turnSpeed,
@@ -511,7 +690,7 @@ function finishStep() {
   const [gx, gy] = S.maze.goal;
   if (S.cx === gx && S.cy === gy) {
     S.wins++; S.running = false; S.stepping = false; S.prog = 1;
-    toast("탈출! (" + S.wins + "번째) — " + S.steps + "칸 · 회전 " + S.turns + "번");
+    toast(t("mWin", S.wins, S.steps, S.turns));
     setTimeout(resetRobot, 900);
     return;
   }
@@ -523,7 +702,7 @@ function finishStep() {
   S.prog = S.best;
   if (S.sinceBest >= STALL_ACTS) {
     S.stalls++; S.sinceBest = 0; S.running = false; S.stepping = false; S.queue = [];
-    toast("맴돌기 — " + STALL_ACTS + "번 움직였는데 도착에 더 가까워지지 못했습니다");
+    toast(t("mStall", STALL_ACTS));
   }
 }
 
@@ -534,13 +713,17 @@ function resetRobot() {
   S.startDist = Math.max(1, bfs(S.cx, S.cy));
   S.best = 0; S.prog = 0; S.sinceBest = 0; S.steps = 0; S.turns = 0; S.queue = [];
   S.drift = 0; S.lat = 0; S.stepping = false;
-  S.msg = "멈춤";
+  S.msgKey = "stStop";
   sampleAll(true);
+}
+function showMazeName() {
+  const m = S.maze;
+  document.getElementById("maze_name").textContent =
+    t("mazeNow", t(m.nameKey), m.w, m.h);
 }
 function setMaze(m) {
   S.maze = m;
-  document.getElementById("maze_name").textContent =
-    "지금 미로 : " + m.name + "  (" + m.w + "x" + m.h + " 칸)";
+  showMazeName();
   resetRobot();
   fit();
 }
@@ -609,8 +792,8 @@ function draw() {
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(text, sx(c[0] * CELL + CELL / 2), sy(c[1] * CELL + CELL / 2));
   };
-  mark(m.start, "#cfe6d8", "출발");
-  mark(m.goal, "#f6d7d3", "도착");
+  mark(m.start, "#cfe6d8", t("start"));
+  mark(m.goal, "#f6d7d3", t("goal"));
 
   // 벽
   ctx.strokeStyle = "#1e2433";
@@ -675,7 +858,7 @@ function tick(now) {
     startStep();
   } else if (S.stepping) {                  // '한 칸만' — 돌고 나아가는 묶음을 끝까지
     if (S.queue && S.queue.length) startStep();
-    else { S.stepping = false; S.msg = "멈춤"; }
+    else { S.stepping = false; S.msgKey = "stStop"; }
   }
   // 멈춰 있어도 라이다는 돌고 있다 — 지금 자리의 값을 계속 보여 준다
   S.nzAge = (S.nzAge || 0) + dt;
@@ -687,8 +870,7 @@ function tick(now) {
 // ====== 화면 숫자 ======
 //   3x3 자리 → 라이다 번호 (-1 은 가운데). 번호는 앞에서 시계 방향으로 45도씩이다.
 const G3 = [[7, 0, 1], [6, -1, 2], [5, 4, 3]];
-const G3LAB = ["앞", "앞오른", "오른", "뒤오른", "뒤", "뒤왼", "왼", "앞왼"];
-const HEADLAB = ["북", "동", "남", "서"];
+//  이름표는 말마다 다르므로 그릴 때 T 에서 꺼낸다
 
 function buildGrid() {
   const box = document.getElementById("grid3");
@@ -698,12 +880,12 @@ function buildGrid() {
       const d = document.createElement("div");
       if (k < 0) {
         d.className = "g3 mid";
-        d.innerHTML = '<div class="d">지금 자리</div>'
+        d.innerHTML = '<div class="d">' + t("here") + '</div>'
           + '<div class="v" id="g3pos">-</div>'
           + '<div class="tv" id="g3head">-</div>';
       } else {
         d.className = "g3";
-        d.innerHTML = '<div class="d">' + G3LAB[k] + '</div>'
+        d.innerHTML = '<div class="d">' + t("d" + k) + '</div>'
           + '<div class="v" id="g3v' + k + '">0</div>'
           + '<div class="tv" id="g3t' + k + '"></div>';
       }
@@ -723,11 +905,11 @@ function paint() {
     const isOpen = openQ(d);
     cell.classList.toggle("open", isOpen);
     cell.classList.toggle("wall", !isOpen);
-    g("g3t" + k).textContent = S.showTrue ? "참 " + Math.round(S.lidT[k]) : "";
+    g("g3t" + k).textContent = S.showTrue ? t("truePrefix", Math.round(S.lidT[k])) : "";
   }
   if (g("g3pos")) {
     g("g3pos").textContent = "(" + S.cx + ", " + S.cy + ")";
-    g("g3head").textContent = HEADLAB[S.head] + "쪽을 봄";
+    g("g3head").textContent = t("facing", t("h" + S.head));
   }
   g("v_prog").textContent = Math.round(S.prog * 100) + "%";
   g("prog_fill").style.width = (S.prog * 100).toFixed(0) + "%";
@@ -740,7 +922,8 @@ function paint() {
   g("v_lat").textContent = Math.round(S.lat || 0) + "mm";
   const b = g("badge");
   const half = !S.running && !S.stepping && S.anim && S.anim.kind === "move";
-  b.textContent = "상태 : " + (S.running ? "달리는 중" : (half ? "멈춤 (칸을 건너는 중)" : S.msg));
+  b.textContent = t("stateFmt",
+    t(S.running ? "stRun" : (half ? "stMid" : S.msgKey)));
   b.style.background = S.running ? "#eaf3ff" : "#eee";
   b.style.color = S.running ? "#1d4ea8" : "#555";
   for (let i = 0; i < RULES.length; i++) {
@@ -765,17 +948,17 @@ function drawRules() {
     const ix = document.createElement("span");
     ix.className = "ix"; ix.textContent = (i + 1) + ".";
     const cs = document.createElement("select");
-    COND.forEach(([v, label]) => {
+    COND.forEach(v => {
       const o = document.createElement("option");
-      o.value = v; o.textContent = label; if (v === c) o.selected = true;
+      o.value = v; o.textContent = t(v); if (v === c) o.selected = true;
       cs.appendChild(o);
     });
     cs.onchange = e => { RULES[i][0] = e.target.value; };
     const arrow = document.createElement("span"); arrow.textContent = "→";
     const as = document.createElement("select");
-    ACT.forEach(([v, label]) => {
+    ACT.forEach(v => {
       const o = document.createElement("option");
-      o.value = v; o.textContent = label; if (v === a) o.selected = true;
+      o.value = v; o.textContent = actLabel(v); if (v === a) o.selected = true;
       as.appendChild(o);
     });
     as.onchange = e => { RULES[i][1] = e.target.value; };
@@ -819,39 +1002,37 @@ function bind() {
   G("btn_go").onclick = () => {
     S.running = !S.running;
     S.stepping = false;
-    G("btn_go").textContent = S.running ? "정지" : "출발";
+    G("btn_go").textContent = S.running ? t("stop") : t("go");
     if (S.running) S.sinceBest = 0;
-    else S.msg = S.anim ? "멈춤 (칸을 건너는 중)" : "멈춤";
+    else S.msgKey = S.anim ? "stMid" : "stStop";
   };
   G("btn_step").onclick = () => {
-    S.running = false; G("btn_go").textContent = "출발";
+    S.running = false; G("btn_go").textContent = t("go");
     S.stepping = true;
     if (!S.anim && !(S.queue && S.queue.length)) startStep();
   };
   G("btn_reset").onclick = () => {
-    S.running = false; G("btn_go").textContent = "출발"; resetRobot();
+    S.running = false; G("btn_go").textContent = t("go"); resetRobot();
   };
   G("btn_clear").onclick = () => {
-    S.wins = S.crashes = S.stalls = 0; toast("기록을 지웠습니다");
+    S.wins = S.crashes = S.stalls = 0; toast(t("mCleared"));
   };
   G("btn_true").onclick = () => {
     S.showTrue = !S.showTrue;
     G("btn_true").classList.toggle("on", S.showTrue);
-    G("btn_true").textContent = S.showTrue ? "참값 숨기기" : "참값 함께 보기";
-    toast(S.showTrue ? "잡음 없는 참값을 함께 보여 줍니다" : "잰 값만 보여 줍니다");
+    G("btn_true").textContent = S.showTrue ? t("trueHide") : t("trueShow");
+    toast(t(S.showTrue ? "mTrueOn" : "mTrueOff"));
   };
   G("btn_add").onclick = () => { RULES.push(["always", "go_front"]); drawRules(); };
-  const setPreset = (k, hint) => {
+  const setPreset = (k, hintKey) => {
     RULES = PRESETS[k].map(r => r.slice());
     drawRules();
-    G("rule_hint").textContent = hint;
+    S.hintKey = hintKey;
+    G("rule_hint").textContent = t(hintKey);
   };
-  G("btn_left").onclick = () => setPreset("left",
-    "왼손을 벽에 대고 걷는 것과 같다 — 왼쪽이 열려 있으면 무조건 왼쪽.");
-  G("btn_right").onclick = () => setPreset("right",
-    "오른손을 벽에 대고 걷는다. 미로가 같아도 지나는 길이 달라진다.");
-  G("btn_front").onclick = () => setPreset("front",
-    "앞이 열렸으면 계속 직진한다. 갈림길에서 길을 놓치기 쉽다.");
+  G("btn_left").onclick = () => setPreset("left", "hintLeft");
+  G("btn_right").onclick = () => setPreset("right", "hintRight");
+  G("btn_front").onclick = () => setPreset("front", "hintFront");
 
   G("btn_maze").onclick = () => { S.mazeIx = (S.mazeIx + 1) % 4; setMaze(preset(S.mazeIx)); };
   G("btn_new").onclick = () => {
@@ -861,29 +1042,26 @@ function bind() {
   G("btn_draw").onclick = () => {
     S.drawing = !S.drawing;
     G("btn_draw").classList.toggle("on", S.drawing);
-    toast(S.drawing ? "벽을 누르면 생기고 지워집니다" : "그리기를 껐습니다");
+    toast(t(S.drawing ? "mDrawOn" : "mDrawOff"));
   };
   G("btn_teacher").onclick = () => {
     S.teacher = !S.teacher;
     G("teacher").classList.toggle("hide", !S.teacher);
-    G("btn_teacher").textContent = S.teacher ? "교사용 닫기" : "교사용 열기";
+    G("btn_teacher").textContent = S.teacher ? t("teacherClose") : t("teacherOpen");
   };
-  const env = (noise, minr, miss, slip, text) => () => {
+  const env = (noise, minr, miss, slip, key) => () => {
     S.noise = noise; S.minr = minr; S.miss = miss; S.slip = slip;
     for (const id of ["noise", "minr", "miss", "slip"]) {
       const el = document.getElementById("in_" + id);
       el.value = S[id];
       el.dispatchEvent(new Event("input"));
     }
-    toast(text);
+    toast(t(key));
   };
-  G("btn_env1").onclick = env(60, 90, 2, 0,
-    "환경 ① 검은 무광 벽 — 빛이 되돌아오지 않아 벽을 놓칩니다");
-  G("btn_env2").onclick = env(180, 90, 3, 0,
-    "환경 ② 유리·거울·금속 벽 — 빛이 비껴 나가 벽이 멀리 찍힙니다");
-  G("btn_env3").onclick = env(10, 90, 0, 12,
-    "환경 ③ 미끄러운 바닥 — 라이다는 멀쩡한데 몸이 틀어집니다");
-  G("btn_env0").onclick = env(10, 90, 0, 0, "환경을 처음 상태로 되돌렸습니다");
+  G("btn_env1").onclick = env(60, 90, 2, 0, "mEnv1");
+  G("btn_env2").onclick = env(180, 90, 3, 0, "mEnv2");
+  G("btn_env3").onclick = env(10, 90, 0, 12, "mEnv3");
+  G("btn_env0").onclick = env(10, 90, 0, 0, "mEnv0");
 
   // 미로 그리기 — 칸의 가장자리를 누르면 그쪽 벽이 생기고 지워진다
   canvas.addEventListener("click", e => {
@@ -902,14 +1080,21 @@ function bind() {
     if (nx >= 0 && ny >= 0 && nx < S.maze.w && ny < S.maze.h) {
       S.maze.g[ny][nx][DIRS[di][3]] = now;
     }
-    S.maze.name = "직접 그린 미로";
-    document.getElementById("maze_name").textContent =
-      "지금 미로 : " + S.maze.name + "  (" + S.maze.w + "x" + S.maze.h + " 칸)";
+    S.maze.nameKey = "mzDrawn";
+    showMazeName();
     resetRobot();
   });
 
+  document.querySelectorAll(".langbtn").forEach(b => {
+    b.onclick = () => applyLang(b.getAttribute("data-lang"));
+  });
+  let saved = "ko";
+  try { saved = localStorage.getItem("mazesim_lang") || "ko"; } catch (e) {}
+  if (!T[saved]) saved = "ko";
+
   drawRules();
   setMaze(preset(0));
+  applyLang(saved);
   requestAnimationFrame(tick);
 }
 bind();
