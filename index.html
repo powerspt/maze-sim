@@ -190,7 +190,7 @@ const T = {
     sub: "라이다로 잰 거리로 벽인지 아닌지를 가른다",
     go: "출발", stop: "정지", step: "한 칸만", toStart: "처음으로", clear: "기록 지우기",
     lThr: "벽 판정 기준", lSpeed: "속도", lTurn: "회전 속도",
-    capMeasure: "기준보다 가까우면 '벽', 멀면 '열림'으로 본다. 한 칸은 360mm — 바로 앞이 벽이면 160mm, 한 칸 열렸으면 520mm 로 찍힌다.<br><b>정지</b>를 누르면 칸을 건너는 도중에도 그 자리에서 멈춘다. 멈춘 자리의 라이다 값이 오른쪽 3x3 에 그대로 남는다.",
+    capMeasure: "기준보다 가까우면 '벽', 멀면 '열림'으로 본다. 한 칸은 270mm — 바로 앞이 벽이면 133mm, 한 칸 열렸으면 403mm 로 찍힌다.<br><b>정지</b>를 누르면 칸을 건너는 도중에도 그 자리에서 멈춘다. 멈춘 자리의 라이다 값이 오른쪽 3x3 에 그대로 남는다.",
     nProg: "진행", nWin: "탈출", nCrash: "충돌", nStall: "맴돌기",
     nStep: "간 칸", nTurn: "회전", nDrift: "방향 오차", nLat: "쏠림",
     capCount: "탈출 = 도착 칸에 들어감 · 충돌 = 벽이 있는데 앞으로 감 · 맴돌기 = 60번 움직였는데도 도착에 더 가까워지지 못함",
@@ -205,11 +205,11 @@ const T = {
     lNoise: "라이다 잡음", lMinr: "최소 측정 거리", lMiss: "벽 놓칠 확률", lSlip: "회전 오차",
     env1: "환경 ① 검은 무광 벽", env2: "환경 ② 유리·금속 벽",
     env3: "환경 ③ 미끄러운 바닥", env0: "원래대로",
-    capEnv: "라이다는 스스로 빛을 쏘아 되돌아오는 시간을 잰다. 그래서 <b>방이 밝은지 어두운지는 상관이 없다</b>. 흔들리는 것은 벽의 재질과 각도다.<br>환경 ① <b>검은 무광 벽</b> — 빛을 거의 되돌려 주지 않아 가끔 벽을 놓친다 (잡음 ±60 · 놓침 2%, 다섯 판에 한 판쯤 박는다)<br>환경 ② <b>유리·거울·금속 벽</b> — 빛이 비껴 나가 벽이 없는 것처럼 멀리 찍힌다 (잡음 ±180 · 놓침 3%, 절반 넘게 박는다)<br>환경 ③ <b>미끄러운 바닥</b> — 라이다는 멀쩡하다. 바퀴가 미끄러져 몸이 틀어지고, 틀어진 채로 재니 값이 어긋나며 옆으로 쏠린다 (회전 오차 12°)<br>잡음은 ±150 까지는 멀쩡하다. 벽 160 에 150 을 더해도 기준 300 을 못 넘기 때문이다.<br>최소 측정 거리는 실물 라이다가 90mm 다. 360mm 로 올리면 벽이 모두 열려 보인다.",
+    capEnv: "라이다는 스스로 빛을 쏘아 되돌아오는 시간을 잰다. 그래서 <b>방이 밝은지 어두운지는 상관이 없다</b>. 흔들리는 것은 벽의 재질과 각도다.<br>환경 ① <b>검은 무광 벽</b> — 빛을 거의 되돌려 주지 않아 가끔 벽을 놓친다 (잡음 ±60 · 놓침 2%, 다섯 판에 한 판쯤 박는다)<br>환경 ② <b>유리·거울·금속 벽</b> — 빛이 비껴 나가 벽이 없는 것처럼 멀리 찍힌다 (잡음 ±180 · 놓침 3%, 절반 넘게 박는다)<br>환경 ③ <b>미끄러운 바닥</b> — 라이다는 멀쩡하다. 바퀴가 미끄러져 몸이 틀어지고, 틀어진 채로 재니 값이 어긋나며 옆으로 쏠린다 (회전 오차 12°)<br>잡음은 ±130 까지는 멀쩡하다. 벽 133 에 130 을 더해도 기준 270 을 못 넘기 때문이다.<br>최소 측정 거리는 실물 라이다가 90mm 다. 140mm 만 넘겨도 벽이 모두 열려 보인다.",
     lidTitle: "라이다가 지금 보는 값",
     lidSub: "여덟 방향 거리 (mm)<br>위쪽이 로봇이 보는 앞",
     trueShow: "참값 함께 보기", trueHide: "참값 숨기기",
-    capLid: "<span style='color:#1d4ea8;'>■</span> 기준보다 멀다 = 열림 · <span style='color:#a8352c;'>■</span> 기준보다 가깝다 = 벽<br>칸 가운데에서 재면 벽은 <b>160</b>, 한 칸 열렸으면 <b>520</b>, 두 칸이면 <b>880</b> 이다 (360 씩 늘어난다). 대각선은 모서리까지 <b>226</b> — 160의 √2 배다. 모서리가 양쪽 다 열려 있으면 그 틈으로 더 멀리 나간다.<br><b>∞</b> 는 되돌아온 빛이 없어 못 잰 것이다.<br>달리는 중에 <b>정지</b>를 누르면 그 자리의 값이 멈춘다 — \"여기서는 얼마로 찍힐까\" 를 먼저 맞혀 보게 한다.",
+    capLid: "<span style='color:#1d4ea8;'>■</span> 기준보다 멀다 = 열림 · <span style='color:#a8352c;'>■</span> 기준보다 가깝다 = 벽<br>칸 가운데에서 재면 벽은 <b>133</b>, 한 칸 열렸으면 <b>403</b>, 두 칸이면 <b>673</b> 이다 (270 씩 늘어난다). 대각선은 모서리까지 <b>187</b> — 133의 √2 배다. 모서리가 양쪽 다 열려 있으면 그 틈으로 더 멀리 나간다.<br><b>∞</b> 는 되돌아온 빛이 없어 못 잰 것이다.<br>달리는 중에 <b>정지</b>를 누르면 그 자리의 값이 멈춘다 — \"여기서는 얼마로 찍힐까\" 를 먼저 맞혀 보게 한다.",
     stateFmt: "상태 : %1",
     stStop: "멈춤", stRun: "달리는 중", stMid: "멈춤 (칸을 건너는 중)",
     stNoRule: "멈춤 — 맞는 규칙이 없다",
@@ -225,7 +225,7 @@ const T = {
     mEnv3: "환경 ③ 미끄러운 바닥 — 라이다는 멀쩡한데 몸이 틀어집니다",
     mEnv0: "환경을 처음 상태로 되돌렸습니다",
     mazeNow: "지금 미로 : %1  (%2x%3 칸)",
-    mz0: "수업용 (기본)", mz1: "수업용 작은 미로 (복층 한 층)", mz2: "ㄹ 자",
+    mz0: "수업용 (기본)", mz1: "복층 미로 판 (3x3, 실제 판과 같다)", mz2: "ㄹ 자",
     mzRand: "무작위", mzDrawn: "직접 그린 미로",
     start: "출발", goal: "도착",
     d0: "앞", d1: "앞오른", d2: "오른", d3: "뒤오른",
@@ -244,7 +244,7 @@ const T = {
     sub: "The distance the LiDAR measures decides: wall or opening",
     go: "Start", stop: "Stop", step: "One cell", toStart: "To the start", clear: "Clear record",
     lThr: "Wall threshold", lSpeed: "Speed", lTurn: "Turn speed",
-    capMeasure: "Closer than the threshold is a 'wall', farther is 'open'. One cell is 360mm — a wall right ahead reads 160mm, one open cell reads 520mm.<br>Press <b>Stop</b> and the robot halts where it is, even in mid-crossing. The LiDAR reading at that spot stays in the 3x3 on the right.",
+    capMeasure: "Closer than the threshold is a 'wall', farther is 'open'. One cell is 270mm — a wall right ahead reads 133mm, one open cell reads 403mm.<br>Press <b>Stop</b> and the robot halts where it is, even in mid-crossing. The LiDAR reading at that spot stays in the 3x3 on the right.",
     nProg: "Progress", nWin: "Escapes", nCrash: "Crashes", nStall: "Circling",
     nStep: "Cells", nTurn: "Turns", nDrift: "Heading error", nLat: "Sideways drift",
     capCount: "Escape = reached the goal cell · Crash = drove forward into a wall · Circling = 60 moves without getting any closer to the goal",
@@ -259,11 +259,11 @@ const T = {
     lNoise: "LiDAR noise", lMinr: "Min. range", lMiss: "Wall-miss chance", lSlip: "Turn error",
     env1: "① Matte black walls", env2: "② Glass · metal walls",
     env3: "③ Slippery floor", env0: "Reset",
-    capEnv: "The LiDAR sends out its own light and times the echo, so <b>it makes no difference whether the room is bright or dark</b>. What shakes the reading is the material and the angle of the wall.<br>Env ① <b>matte black walls</b> — almost no light comes back, so a wall is missed now and then (noise ±60 · miss 2%, about one crash in five runs)<br>Env ② <b>glass, mirror or metal walls</b> — the light glances off and the wall reads far away, as if it were not there (noise ±180 · miss 3%, crashes more than half the time)<br>Env ③ <b>slippery floor</b> — the LiDAR is fine. The wheels slip, the body ends up askew, and measuring while askew throws the readings off and pushes the robot sideways (turn error 12°)<br>Noise up to ±150 is harmless: a wall at 160 plus 150 still does not pass the threshold of 300.<br>The real LiDAR has a minimum range of 90mm. Raise it to 360mm and every wall looks open.",
+    capEnv: "The LiDAR sends out its own light and times the echo, so <b>it makes no difference whether the room is bright or dark</b>. What shakes the reading is the material and the angle of the wall.<br>Env ① <b>matte black walls</b> — almost no light comes back, so a wall is missed now and then (noise ±60 · miss 2%, about one crash in five runs)<br>Env ② <b>glass, mirror or metal walls</b> — the light glances off and the wall reads far away, as if it were not there (noise ±180 · miss 3%, crashes more than half the time)<br>Env ③ <b>slippery floor</b> — the LiDAR is fine. The wheels slip, the body ends up askew, and measuring while askew throws the readings off and pushes the robot sideways (turn error 12°)<br>Noise up to ±130 is harmless: a wall at 133 plus 130 still does not pass the threshold of 270.<br>The real LiDAR has a minimum range of 90mm. Raise it past 140mm and every wall looks open.",
     lidTitle: "What the LiDAR sees now",
     lidSub: "Eight directions, in mm<br>Up is the robot's front",
     trueShow: "Show true values", trueHide: "Hide true values",
-    capLid: "<span style='color:#1d4ea8;'>■</span> farther than the threshold = open · <span style='color:#a8352c;'>■</span> closer = wall<br>Measured from the centre of a cell, a wall reads <b>160</b>, one open cell <b>520</b>, two cells <b>880</b> (360 at a time). A diagonal reaches the corner at <b>226</b> — 160 times √2. If both sides of a corner are open, the beam slips through and goes farther.<br><b>∞</b> means no light came back and nothing could be measured.<br>Press <b>Stop</b> while it runs and the readings freeze where it stands — ask \"what will it read here?\" before you look.",
+    capLid: "<span style='color:#1d4ea8;'>■</span> farther than the threshold = open · <span style='color:#a8352c;'>■</span> closer = wall<br>Measured from the centre of a cell, a wall reads <b>133</b>, one open cell <b>403</b>, two cells <b>673</b> (270 at a time). A diagonal reaches the corner at <b>187</b> — 133 times √2. If both sides of a corner are open, the beam slips through and goes farther.<br><b>∞</b> means no light came back and nothing could be measured.<br>Press <b>Stop</b> while it runs and the readings freeze where it stands — ask \"what will it read here?\" before you look.",
     stateFmt: "Status : %1",
     stStop: "stopped", stRun: "running", stMid: "stopped (mid-crossing)",
     stNoRule: "stopped — no rule matched",
@@ -279,7 +279,7 @@ const T = {
     mEnv3: "Env ③ slippery floor — the LiDAR is fine, but the body goes askew",
     mEnv0: "Conditions back to the start",
     mazeNow: "Maze : %1  (%2x%3 cells)",
-    mz0: "Class maze (default)", mz1: "Small class maze (one floor of the two-level maze)",
+    mz0: "Class maze (default)", mz1: "The real two-level maze board (3x3)",
     mz2: "Zigzag", mzRand: "Random", mzDrawn: "Your own maze",
     start: "START", goal: "GOAL",
     d0: "front", d1: "fr-right", d2: "right", d3: "bk-right",
@@ -298,7 +298,7 @@ const T = {
     sub: "Расстояние, измеренное лидаром, решает: стена или проход",
     go: "Старт", stop: "Стоп", step: "Одна клетка", toStart: "В начало", clear: "Сбросить счёт",
     lThr: "Порог стены", lSpeed: "Скорость", lTurn: "Скорость поворота",
-    capMeasure: "Ближе порога — «стена», дальше — «проход». Одна клетка 360 мм: стена прямо перед роботом читается как 160 мм, одна открытая клетка — как 520 мм.<br>Нажмите <b>Стоп</b> — робот остановится там, где стоит, даже посреди клетки. Показания лидара в этой точке останутся в сетке 3x3 справа.",
+    capMeasure: "Ближе порога — «стена», дальше — «проход». Одна клетка 270 мм: стена прямо перед роботом читается как 133 мм, одна открытая клетка — как 403 мм.<br>Нажмите <b>Стоп</b> — робот остановится там, где стоит, даже посреди клетки. Показания лидара в этой точке останутся в сетке 3x3 справа.",
     nProg: "Пройдено", nWin: "Выходов", nCrash: "Столкновений", nStall: "Кружит",
     nStep: "Клеток", nTurn: "Поворотов", nDrift: "Ошибка курса", nLat: "Снос",
     capCount: "Выход = вошёл в финишную клетку · Столкновение = поехал вперёд в стену · Кружит = 60 действий без приближения к финишу",
@@ -314,11 +314,11 @@ const T = {
     lNoise: "Шум лидара", lMinr: "Мин. дальность", lMiss: "Пропуск стены", lSlip: "Ошибка поворота",
     env1: "① Чёрные матовые стены", env2: "② Стекло · металл",
     env3: "③ Скользкий пол", env0: "Как было",
-    capEnv: "Лидар сам посылает свет и измеряет время возврата, поэтому <b>светло в помещении или темно — неважно</b>. Показания сбивают материал и угол стены.<br>Среда ① <b>чёрные матовые стены</b> — света почти не возвращается, и стена иногда теряется (шум ±60 · пропуск 2%, примерно одно столкновение на пять попыток)<br>Среда ② <b>стеклянные, зеркальные или металлические стены</b> — свет уходит вскользь, и стена читается далеко, будто её нет (шум ±180 · пропуск 3%, столкновения более чем в половине попыток)<br>Среда ③ <b>скользкий пол</b> — лидар исправен. Колёса проскальзывают, корпус разворачивает, и измерения со смещённого курса уводят робота вбок (ошибка поворота 12°)<br>Шум до ±150 безвреден: 160 у стены плюс 150 всё равно не превышает порог 300.<br>У настоящего лидара минимальная дальность 90 мм. Поднимите её до 360 мм — и все стены покажутся проходами.",
+    capEnv: "Лидар сам посылает свет и измеряет время возврата, поэтому <b>светло в помещении или темно — неважно</b>. Показания сбивают материал и угол стены.<br>Среда ① <b>чёрные матовые стены</b> — света почти не возвращается, и стена иногда теряется (шум ±60 · пропуск 2%, примерно одно столкновение на пять попыток)<br>Среда ② <b>стеклянные, зеркальные или металлические стены</b> — свет уходит вскользь, и стена читается далеко, будто её нет (шум ±180 · пропуск 3%, столкновения более чем в половине попыток)<br>Среда ③ <b>скользкий пол</b> — лидар исправен. Колёса проскальзывают, корпус разворачивает, и измерения со смещённого курса уводят робота вбок (ошибка поворота 12°)<br>Шум до ±130 безвреден: 133 у стены плюс 130 всё равно не превышает порог 270.<br>У настоящего лидара минимальная дальность 90 мм. Поднимите её выше 140 мм — и все стены покажутся проходами.",
     lidTitle: "Что лидар видит сейчас",
     lidSub: "Восемь направлений, мм<br>Вверху — перёд робота",
     trueShow: "Показать истинные значения", trueHide: "Скрыть истинные значения",
-    capLid: "<span style='color:#1d4ea8;'>■</span> дальше порога = проход · <span style='color:#a8352c;'>■</span> ближе порога = стена<br>Из центра клетки стена читается как <b>160</b>, одна открытая клетка — <b>520</b>, две — <b>880</b> (шаг 360). По диагонали до угла <b>226</b> — это 160 × √2. Если обе стороны угла открыты, луч уходит в щель дальше.<br><b>∞</b> — свет не вернулся, измерить не удалось.<br>Нажмите <b>Стоп</b> на ходу — показания замрут на месте: спросите «сколько здесь будет?» прежде, чем смотреть.",
+    capLid: "<span style='color:#1d4ea8;'>■</span> дальше порога = проход · <span style='color:#a8352c;'>■</span> ближе порога = стена<br>Из центра клетки стена читается как <b>133</b>, одна открытая клетка — <b>403</b>, две — <b>673</b> (шаг 270). По диагонали до угла <b>187</b> — это 133 × √2. Если обе стороны угла открыты, луч уходит в щель дальше.<br><b>∞</b> — свет не вернулся, измерить не удалось.<br>Нажмите <b>Стоп</b> на ходу — показания замрут на месте: спросите «сколько здесь будет?» прежде, чем смотреть.",
     stateFmt: "Состояние : %1",
     stStop: "стоит", stRun: "едет", stMid: "стоит (посреди клетки)",
     stNoRule: "стоит — ни одно правило не подошло",
@@ -334,7 +334,7 @@ const T = {
     mEnv3: "Среда ③ скользкий пол — лидар исправен, но корпус разворачивает",
     mEnv0: "Условия возвращены к началу",
     mazeNow: "Лабиринт : %1  (%2x%3 клеток)",
-    mz0: "Учебный (основной)", mz1: "Малый учебный (один этаж двухуровневого)",
+    mz0: "Учебный (основной)", mz1: "Настоящая плата двухуровневого лабиринта (3x3)",
     mz2: "Змейка", mzRand: "Случайный", mzDrawn: "Нарисованный вами",
     start: "СТАРТ", goal: "ФИНИШ",
     d0: "перёд", d1: "перёд-пр.", d2: "право", d3: "зад-пр.",
@@ -382,9 +382,9 @@ function applyLang(code) {
 }
 
 // ====== 치수 (mm) — 복층 미로 단원과 같다 ======
-const CELL = 360;          // 한 칸 (타일 180mm 두 장)
-const WALLT = 40;          // 벽 두께
-const BODY = 100;          // 비글 몸통 폭
+const CELL = 270;          // 한 칸 — 벽 홀 3칸 (홀 간격 90mm)
+const WALLT = 5;           // 벽 두께 — 실물 벽 조각과 같다
+const BODY = 120;          // 비글 몸통 폭 (실측)
 const MAXR = 5000;         // 라이다 최대 거리
 const STALL_ACTS = 60;     // 이만큼 움직였는데도 도착에 더 가까워지지 못하면 '맴돌기'
 
@@ -452,12 +452,15 @@ function preset(which) {
     m.start = [0, 4]; m.goal = [4, 0];
     return m;
   }
-  if (which === 1) {                       // 복층 미로 단원의 한 층 (3x2 = 6칸)
-    const m = blank(3, 2);                 // 길 : 출발(0,1) → (0,0) → (1,0) → (1,1) → (2,1) → 도착(2,0)
-    const path = [[0, 1, 0], [0, 0, 1], [1, 0, 2], [1, 1, 1], [2, 1, 0]];
+  if (which === 1) {                       // 복층 미로 판 그대로 (3x3 = 9칸)
+    //  maze_board.py 의 OPEN 과 같다. 열 0~2 = A~C, 행 0~2 = 1~3.
+    //  1층은 C3 으로 들어가 A1 로 나온다 — 막다른 길은 B3 과 A3.
+    const m = blank(3, 3);
+    const path = [[2, 2, 0], [2, 1, 0], [2, 0, 3], [1, 0, 2],
+                  [1, 1, 3], [0, 1, 0], [0, 1, 2], [1, 1, 2]];
     for (const [x, y, di] of path) carve(m, x, y, x + DIRS[di][0], y + DIRS[di][1], di);
     m.nameKey = "mz1";
-    m.start = [0, 1]; m.goal = [2, 0];
+    m.start = [2, 2]; m.goal = [0, 0];
     return m;
   }
   if (which === 2) {                       // 한 줄로 이어진 ㄹ 자 — 좌수법이 잘 통한다
@@ -481,7 +484,7 @@ function preset(which) {
 
 // ====== 상태 ======
 const S = {
-  thr: 300, speed: 1.2, turnSpeed: 1.2,
+  thr: 270, speed: 1.2, turnSpeed: 1.2,
   noise: 10, minr: 90, miss: 0, slip: 0,
   maze: null, cx: 0, cy: 0, head: 0,          // head : 0 북 1 동 2 남 3 서
   anim: null, running: false, stepping: false, drawing: false,
@@ -514,7 +517,7 @@ const PRESETS = {
 let RULES = PRESETS.left.map(r => r.slice());
 
 // ====== 라이다 ======
-//   벽은 격자선 위에 40mm 두께로 서 있다. 어떤 점이 벽 속에 있는지 본다.
+//   벽은 격자선 위에 5mm 두께로 서 있다. 어떤 점이 벽 속에 있는지 본다.
 //   벽은 이웃한 두 칸이 똑같이 들고 있으므로 점이 든 칸만 보면 된다.
 function wallAt(px, py) {
   const m = S.maze, h = WALLT / 2;
@@ -531,7 +534,8 @@ function wallAt(px, py) {
 
 //   지금 자리에서 그 방향으로 쏜다. 조금씩 나아가며 처음 벽에 닿은 거리를 돌려준다.
 //   칸 단위가 아니라 mm 단위로 재기 때문에 칸을 건너는 도중에도 값이 나온다.
-const RAYSTEP = 6;
+//   걸음이 벽 두께보다 굵으면 얇은 벽을 그냥 타고 넘는다 — 벽의 절반보다 잘게 걷는다
+const RAYSTEP = Math.max(1, Math.min(6, WALLT / 2));
 function rayFrom(px, py, angDeg) {
   const a = (angDeg - 90) * Math.PI / 180;        // 화면 좌표 (앞 = 위쪽)
   const dx = Math.cos(a), dy = Math.sin(a);
@@ -540,7 +544,7 @@ function rayFrom(px, py, angDeg) {
     const x = px + dx * d, y = py + dy * d;
     if (x < -CELL || y < -CELL || x > outW + CELL || y > outH + CELL) break;
     if (wallAt(x, y)) {
-      // 성큼성큼 오다 닿았으니 되짚어 다듬는다 — 벽은 160, 한 칸은 520 으로 딱 떨어져야 한다
+      // 성큼성큼 오다 닿았으니 되짚어 다듬는다 — 벽은 133, 한 칸은 403 으로 떨어져야 한다
       let lo = Math.max(0, d - RAYSTEP), hi = d;
       for (let i = 0; i < 12; i++) {
         const mid = (lo + hi) / 2;
@@ -797,7 +801,7 @@ function draw() {
 
   // 벽
   ctx.strokeStyle = "#1e2433";
-  ctx.lineWidth = Math.max(2, WALLT * PX);
+  ctx.lineWidth = Math.max(4, WALLT * PX);        // 5mm 벽은 너무 가늘어 보이니 굵게 그린다
   ctx.lineCap = "butt";
   for (let y = 0; y < m.h; y++) {
     for (let x = 0; x < m.w; x++) {
